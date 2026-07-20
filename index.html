@@ -1,160 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Tetris!</title>
-<style>
-body{
-    background:#111;
-    color:white;
-    text-align:center;
-    font-family:monospace;
-}
-canvas{
-    background:#000;
-    border:3px solid white;
-    margin-top:20px;
-}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retro Army - Tetris</title>
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<h1>Simple Blocks</h1>
-<p>Money: $<span id="money">0</span></p>
+<h1>RETRO BLOCKS</h1>
+
+<div id="info">
+    Score:
+    <span id="score">0</span>
+
+    &nbsp;&nbsp;
+
+    Money:
+    $
+    <span id="money">0</span>
+</div>
 
 <canvas id="game" width="200" height="400"></canvas>
 
-<script>
-
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
-
-const SIZE=20;
-const ROWS=20;
-const COLS=10;
-
-let money=0;
-
-const board=[];
-
-for(let y=0;y<ROWS;y++){
-    board[y]=[];
-    for(let x=0;x<COLS;x++){
-        board[y][x]=0;
-    }
-}
-
-let block={
-    x:4,
-    y:0
-};
-
-function draw(){
-
-ctx.clearRect(0,0,200,400);
-
-for(let y=0;y<ROWS;y++){
-    for(let x=0;x<COLS;x++){
-
-        if(board[y][x]){
-            ctx.fillStyle="lime";
-            ctx.fillRect(x*SIZE,y*SIZE,SIZE-1,SIZE-1);
-        }
-
-    }
-}
-
-ctx.fillStyle="cyan";
-ctx.fillRect(block.x*SIZE,block.y*SIZE,SIZE-1,SIZE-1);
-
-}
-
-function newBlock(){
-    block.x=4;
-    block.y=0;
-}
-
-function clearLines(){
-
-for(let y=ROWS-1;y>=0;y--){
-
-    let full=true;
-
-    for(let x=0;x<COLS;x++){
-        if(board[y][x]==0){
-            full=false;
-            break;
-        }
-    }
-
-    if(full){
-
-        board.splice(y,1);
-
-        board.unshift(new Array(COLS).fill(0));
-
-        money+=100;
-
-        document.getElementById("money").innerText=money;
-
-        y++;
-    }
-
-}
-
-}
-
-function update(){
-
-if(block.y==ROWS-1 || board[block.y+1][block.x]){
-
-    board[block.y][block.x]=1;
-
-    clearLines();
-
-    newBlock();
-
-}else{
-
-    block.y++;
-
-}
-
-draw();
-
-}
-
-setInterval(update,500);
-
-document.addEventListener("keydown",e=>{
-
-if(e.key=="ArrowLeft"){
-
-    if(block.x>0 && !board[block.y][block.x-1])
-        block.x--;
-
-}
-
-if(e.key=="ArrowRight"){
-
-    if(block.x<COLS-1 && !board[block.y][block.x+1])
-        block.x++;
-
-}
-
-if(e.key=="ArrowDown"){
-
-    update();
-
-}
-
-draw();
-
-});
-
-draw();
-
-</script>
+<script src="game.js"></script>
 
 </body>
 </html>
