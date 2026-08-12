@@ -1,36 +1,101 @@
 
-const c=document.getElementById('game'),x=c.getContext('2d');
-const W=10,H=20,S=20;
-const board=Array.from({length:H},()=>Array(W).fill(0));
-const pcs=[[[1,1,1,1]],[[2,2],[2,2]],[[0,3,0],[3,3,3]],[[4,4,0],[0,4,4]],[[0,5,5],[5,5,0]],[[6,0,0],[6,6,6]],[[0,0,7],[7,7,7]]];
-const col=["#000","#0ff","#ff0","#f0f","#0f0","#f00","#00f","#fa0"];
-let p=newPiece(),score=0;
-function newPiece(){let s=pcs[Math.random()*pcs.length|0].map(r=>r.slice());return{x:3,y:0,s};}
-function draw(){
-x.clearRect(0,0,c.width,c.height);
-for(let y=0;y<H;y++)for(let i=0;i<W;i++){x.fillStyle=col[board[y][i]]||"#222";x.fillRect(i*S,y*S,S-1,S-1);}
-for(let y=0;y<p.s.length;y++)for(let i=0;i<p.s[y].length;i++)if(p.s[y][i]){x.fillStyle=col[p.s[y][i]];x.fillRect((p.x+i)*S,(p.y+y)*S,S-1,S-1);}
-document.getElementById("score").textContent=score;
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const COLS = 10, ROWS = 20, CELL = 20;
+
+const board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
+
+const SHAPES = [
+  [[1,1,1,1]],
+  [[2,2],[2,2]],
+  [[0,3,0],[3,3,3]],
+  [[4,4,0],[0,4,4]],
+  [[0,5,5],[5,5,0]],
+  [[6,0,0],[6,6,6]],
+  [[0,0,7],[7,7,7]],
+];
+const COLORS = ["#000","#0ff","#ff0","#f0f","#0f0","#f00","#00f","#fa0"];
+
+let piece = newPiece();
+let score = 0;
+
+function newPiece() {
+  const shape = SHAPES[Math.random() * SHAPES.length | 0].map(row => row.slice());
+  return {x: 3, y: 0, shape};
 }
-function hit(nx=p.x,ny=p.y,sh=p.s){
-for(let y=0;y<sh.length;y++)for(let i=0;i<sh[y].length;i++)if(sh[y][i]){
-let X=nx+i,Y=ny+y;
-if(X<0||X>=W||Y>=H)return true;
-if(Y>=0&&board[Y][X])return true;
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let y = 0; y < ROWS; y++) {
+    for (let x = 0; x < COLS; x++) {
+      ctx.fillStyle = COLORS[board[y][x]] || "#222";
+      ctx.fillRect(x * CELL, y * CELL, CELL - 1, CELL - 1);
+    }
+  }
+  for (let y = 0; y < piece.shape.length; y++) {
+    for (let x = 0; x < piece.shape[y].length; x++) {
+      if (piece.shape[y][x]) {
+        ctx.fillStyle = COLORS[piece.shape[y][x]];
+        ctx.fillRect((piece.x + x) * CELL, (piece.y + y) * CELL, CELL - 1, CELL - 1);
+      }
+    }
+  }
+  document.getElementById("score").textContent = score;
 }
-return false;
+
+function collides(nextX = piece.x, nextY = piece.y, shape = piece.shape) {
+  for (let y = 0; y < shape.length; y++) {
+    for (let x = 0; x < shape[y].length; x++) {
+      if (!shape[y][x]) continue;
+      const boardX = nextX + x, boardY = nextY + y;
+      if (boardX < 0 || boardX >= COLS || boardY >= ROWS) return true;
+      if (boardY >= 0 && board[boardY][boardX]) return true;
+    }
+  }
+  return false;
 }
-function merge(){for(let y=0;y<p.s.length;y++)for(let i=0;i<p.s[y].length;i++)if(p.s[y][i])board[p.y+y][p.x+i]=p.s[y][i];
-for(let y=H-1;y>=0;y--)if(board[y].every(v=>v)){board.splice(y,1);board.unshift(Array(W).fill(0));score+=100;y++;}
-p=newPiece();if(hit()){alert("Game Over");board.forEach(r=>r.fill(0));score=0;}
+
+function lockPiece() {
+  for (let y = 0; y < piece.shape.length; y++) {
+    for (let x = 0; x < piece.shape[y].length; x++) {
+      if (piece.shape[y][x]) board[piece.y + y][piece.x + x] = piece.shape[y][x];
+    }
+  }
+  for (let y = ROWS - 1; y >= 0; y--) {
+    if (board[y].every(cell => cell)) {
+      board.splice(y, 1);
+      board.unshift(Array(COLS).fill(0));
+      score += 100;
+      y++;
+    }
+  }
+  piece = newPiece();
+  if (collides()) {
+    alert("Game Over");
+    board.forEach(row => row.fill(0));
+    score = 0;
+  }
 }
-function rot(){let s=p.s,r=s[0].map((_,i)=>s.map(r=>r[i]).reverse());if(!hit(p.x,p.y,r))p.s=r;}
-document.addEventListener("keydown",e=>{
-if(e.key=="ArrowLeft"&&!hit(p.x-1,p.y))p.x--;
-if(e.key=="ArrowRight"&&!hit(p.x+1,p.y))p.x++;
-if(e.key=="ArrowDown"){tick();}
-if(e.key=="ArrowUp")rot();
-draw();
+
+function rotate() {
+  const shape = piece.shape;
+  const rotated = shape[0].map((_, i) => shape.map(row => row[i]).reverse());
+  if (!collides(piece.x, piece.y, rotated)) piece.shape = rotated;
+}
+
+document.addEventListener("keydown", event => {
+  if (event.key == "ArrowLeft" && !collides(piece.x - 1, piece.y)) piece.x--;
+  if (event.key == "ArrowRight" && !collides(piece.x + 1, piece.y)) piece.x++;
+  if (event.key == "ArrowDown") tick();
+  if (event.key == "ArrowUp") rotate();
+  draw();
 });
-function tick(){if(!hit(p.x,p.y+1))p.y++;else merge();draw();}
-setInterval(tick,500);draw();
+
+function tick() {
+  if (!collides(piece.x, piece.y + 1)) piece.y++;
+  else lockPiece();
+  draw();
+}
+
+setInterval(tick, 500);
+draw();
