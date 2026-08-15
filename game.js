@@ -46,22 +46,37 @@ function spawnFromQueue() {
   return placeAt(shape);
 }
 
+function shade(hex, amt) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.max(0, Math.min(255, (n >> 16) + amt));
+  const g = Math.max(0, Math.min(255, ((n >> 8) & 0xff) + amt));
+  const b = Math.max(0, Math.min(255, (n & 0xff) + amt));
+  return `rgb(${r},${g},${b})`;
+}
+
 function drawCell(context, x, y, cellSize, colorIndex) {
   const color = COLORS[colorIndex];
-  context.fillStyle = "#0b1524";
-  context.fillRect(x * cellSize, y * cellSize, cellSize - 1, cellSize - 1);
+  const px = x * cellSize, py = y * cellSize, s = cellSize - 1;
+  context.fillStyle = "#0f0a1a";
+  context.fillRect(px, py, s, s);
   if (!color) return;
-  context.save();
-  context.shadowColor = color;
-  context.shadowBlur = 8;
+  const bevel = Math.max(2, Math.round(cellSize * 0.14));
   context.fillStyle = color;
-  context.fillRect(x * cellSize + 1, y * cellSize + 1, cellSize - 3, cellSize - 3);
-  context.restore();
+  context.fillRect(px, py, s, s);
+  context.fillStyle = shade(color, 55);
+  context.fillRect(px, py, s, bevel);
+  context.fillRect(px, py, bevel, s);
+  context.fillStyle = shade(color, -55);
+  context.fillRect(px, py + s - bevel, s, bevel);
+  context.fillRect(px + s - bevel, py, bevel, s);
+  context.strokeStyle = "#000";
+  context.lineWidth = 1;
+  context.strokeRect(px + .5, py + .5, s - 1, s - 1);
 }
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.strokeStyle = "rgba(45,212,247,0.08)";
+  ctx.strokeStyle = "rgba(255,255,255,0.05)";
   for (let y = 0; y < ROWS; y++) {
     for (let x = 0; x < COLS; x++) {
       if (board[y][x]) drawCell(ctx, x, y, CELL, board[y][x]);
@@ -91,15 +106,7 @@ function drawPreview(context, canvasEl, shape) {
   context.translate(offsetX, offsetY);
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
-      if (shape[y][x]) {
-        const color = COLORS[shape[y][x]];
-        context.save();
-        context.shadowColor = color;
-        context.shadowBlur = 8;
-        context.fillStyle = color;
-        context.fillRect(x * size + 1, y * size + 1, size - 3, size - 3);
-        context.restore();
-      }
+      if (shape[y][x]) drawCell(context, x, y, size, shape[y][x]);
     }
   }
   context.restore();
