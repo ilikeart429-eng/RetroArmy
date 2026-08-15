@@ -41,7 +41,7 @@ const signOutBtn = document.getElementById('signOutBtn');
 
 let mode = null; // 'signin' | 'signup'
 
-const MIN_LOADING_MS = 600;
+const MIN_LOADING_MS = 5000;
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 function showLoading() {
