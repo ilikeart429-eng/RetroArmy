@@ -83,11 +83,20 @@ function rotate() {
   if (!collides(piece.x, piece.y, rotated)) piece.shape = rotated;
 }
 
+function hardDrop() {
+  while (!collides(piece.x, piece.y + 1)) piece.y++;
+  lockPiece();
+}
+
 document.addEventListener("keydown", event => {
   if (event.key == "ArrowLeft" && !collides(piece.x - 1, piece.y)) piece.x--;
   if (event.key == "ArrowRight" && !collides(piece.x + 1, piece.y)) piece.x++;
   if (event.key == "ArrowDown") tick();
   if (event.key == "ArrowUp") rotate();
+  if (event.key == " ") {
+    event.preventDefault();
+    hardDrop();
+  }
   draw();
 });
 
