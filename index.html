@@ -1,1 +1,61 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><title>Blocks!</title><link rel="stylesheet" href="style.css"></head><body><h1>Blocks!</h1><div>Score: <span id='score'>0</span></div><canvas id='game' width='200' height='400'></canvas><script src='game.js'></script></body></html>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Blocks!</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <h1 class="title">BLOCKS!</h1>
+
+    <div class="hud-top">
+      <div class="panel stat-box">
+        <div class="label">SCORE</div>
+        <div class="value" id="score">0</div>
+      </div>
+      <button id="pauseBtn" class="pause-btn" aria-label="Pause">❚❚</button>
+      <div class="panel stat-box">
+        <div class="label">LEVEL</div>
+        <div class="value" id="level">1</div>
+      </div>
+    </div>
+
+    <div class="main-area">
+      <div class="board-wrap">
+        <canvas id="game" width="220" height="440"></canvas>
+        <div id="overlay" class="overlay hidden">
+          <div id="overlayTitle">PAUSED</div>
+          <div id="overlaySub"></div>
+        </div>
+      </div>
+
+      <div class="side-panel">
+        <div class="panel">
+          <div class="label">NEXT</div>
+          <canvas id="next" width="100" height="90"></canvas>
+        </div>
+        <div class="panel" id="holdPanel">
+          <div class="label">HOLD</div>
+          <canvas id="hold" width="100" height="90"></canvas>
+        </div>
+        <div class="panel stats-panel">
+          <div class="label">STATS</div>
+          <div class="stat-row"><span>LINES</span><span id="lines">0</span></div>
+          <div class="stat-row"><span>HIGH SCORE</span><span id="highscore">0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="leftBtn" aria-label="Left">←</button>
+      <button id="rightBtn" aria-label="Right">→</button>
+      <button id="downBtn" aria-label="Down">↓</button>
+      <button id="rotateBtn" aria-label="Rotate">↻</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
