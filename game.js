@@ -21,7 +21,7 @@ const SHAPES = [
 const COLORS = [null, "#2dd4f7", "#f9e94e", "#b96bf5", "#3ee06a", "#f75c5c", "#4d7dfa", "#f7a53e"];
 
 let score = 0, level = 1, lines = 0;
-let highScore = Number(localStorage.getItem('blocksHighScore') || 0);
+let highScore = 0;
 let paused = false, gameOver = false;
 let nextShape = randomShape();
 let holdShape = null, holdUsed = false;
@@ -149,7 +149,7 @@ function lockPiece() {
     level = Math.floor(lines / 10) + 1;
     if (score > highScore) {
       highScore = score;
-      localStorage.setItem('blocksHighScore', highScore);
+      if (window.saveHighScore) window.saveHighScore(highScore);
     }
   }
 
@@ -295,7 +295,11 @@ function loop() {
   setTimeout(loop, speed);
 }
 
-drawNext();
-drawHold();
-draw();
-loop();
+function startGame(initialHighScore) {
+  highScore = initialHighScore || 0;
+  drawNext();
+  drawHold();
+  draw();
+  loop();
+}
+window.startGame = startGame;

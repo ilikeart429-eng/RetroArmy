@@ -7,8 +7,41 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app">
+  <div id="authScreen" class="auth-screen">
+    <div class="app">
+      <h1 class="title">BLOCKS!</h1>
+      <div class="panel auth-panel">
+        <div id="authChoice" class="auth-choice">
+          <p class="auth-lead">SIGN IN TO SAVE YOUR HIGH SCORE</p>
+          <button id="signInChoice" type="button" class="auth-btn">SIGN IN</button>
+          <button id="signUpChoice" type="button" class="auth-btn">CREATE ACCOUNT</button>
+          <button id="guestChoice" type="button" class="auth-btn auth-btn-ghost">PLAY AS GUEST</button>
+        </div>
+        <form id="authForm" class="auth-form hidden">
+          <div id="authFormTitle" class="auth-form-title">SIGN IN</div>
+          <label class="auth-label" for="authUsername">USERNAME</label>
+          <input id="authUsername" class="auth-input" type="text" autocomplete="username" maxlength="20" required>
+          <label class="auth-label" for="authPassword">PASSWORD</label>
+          <input id="authPassword" class="auth-input" type="password" autocomplete="current-password" required>
+          <div id="authConfirmRow" class="hidden">
+            <label class="auth-label" for="authConfirm">CONFIRM PASSWORD</label>
+            <input id="authConfirm" class="auth-input" type="password" autocomplete="new-password">
+          </div>
+          <div id="authError" class="auth-error hidden"></div>
+          <button id="authSubmit" type="submit" class="auth-btn">SIGN IN</button>
+          <button id="authBack" type="button" class="auth-btn auth-btn-ghost">BACK</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="gameApp" class="app hidden">
     <h1 class="title">BLOCKS!</h1>
+
+    <div class="player-row">
+      <span id="playerName" class="player-name"></span>
+      <button id="signOutBtn" class="signout-btn hidden" type="button">SIGN OUT</button>
+    </div>
 
     <div class="hud-top">
       <div class="panel stat-box">
@@ -57,5 +90,6 @@
   </div>
 
   <script src="game.js"></script>
+  <script type="module" src="auth.js"></script>
 </body>
 </html>
