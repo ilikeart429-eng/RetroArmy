@@ -206,7 +206,7 @@ body{
   .side-panel{width:110px}
 }
 
-.hidden{display:none}
+.hidden{display:none !important}
 
 .player-row{
   display:flex;
