@@ -24,6 +24,7 @@ const EMAIL_DOMAIN = "@retroarmy.local";
 const usernameToEmail = name => name.trim().toLowerCase() + EMAIL_DOMAIN;
 
 const authScreen = document.getElementById('authScreen');
+const loadingScreen = document.getElementById('loadingScreen');
 const gameApp = document.getElementById('gameApp');
 const choiceView = document.getElementById('authChoice');
 const formView = document.getElementById('authForm');
@@ -39,6 +40,17 @@ const playerNameEl = document.getElementById('playerName');
 const signOutBtn = document.getElementById('signOutBtn');
 
 let mode = null; // 'signin' | 'signup'
+
+const MIN_LOADING_MS = 600;
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+function showLoading() {
+  loadingScreen.classList.remove('hidden');
+}
+
+function hideLoading() {
+  loadingScreen.classList.add('hidden');
+}
 
 function showError(msg) {
   errorEl.textContent = msg;
@@ -82,6 +94,7 @@ function friendlyError(err) {
 function enterGame({ username, highScore, mode: playMode, uid }) {
   playerNameEl.textContent = playMode === 'guest' ? 'GUEST' : username.toUpperCase();
   signOutBtn.classList.toggle('hidden', playMode === 'guest');
+  hideLoading();
   authScreen.classList.add('hidden');
   gameApp.classList.remove('hidden');
 
@@ -115,6 +128,8 @@ async function handleSignUp() {
   }
 
   submitBtn.disabled = true;
+  showLoading();
+  const started = Date.now();
   try {
     const cred = await createUserWithEmailAndPassword(auth, usernameToEmail(username), password);
     await setDoc(doc(db, 'users', cred.user.uid), {
@@ -122,8 +137,10 @@ async function handleSignUp() {
       highScore: 0,
       createdAt: serverTimestamp()
     });
+    await delay(Math.max(0, MIN_LOADING_MS - (Date.now() - started)));
     enterGame({ username, highScore: 0, mode: 'account', uid: cred.user.uid });
   } catch (err) {
+    hideLoading();
     showError(friendlyError(err));
   } finally {
     submitBtn.disabled = false;
@@ -140,20 +157,26 @@ async function handleSignIn() {
   }
 
   submitBtn.disabled = true;
+  showLoading();
+  const started = Date.now();
   try {
     const cred = await signInWithEmailAndPassword(auth, usernameToEmail(username), password);
     const snap = await getDoc(doc(db, 'users', cred.user.uid));
     const data = snap.exists() ? snap.data() : { username, highScore: 0 };
+    await delay(Math.max(0, MIN_LOADING_MS - (Date.now() - started)));
     enterGame({ username: data.username || username, highScore: data.highScore || 0, mode: 'account', uid: cred.user.uid });
   } catch (err) {
+    hideLoading();
     showError(friendlyError(err));
   } finally {
     submitBtn.disabled = false;
   }
 }
 
-function playAsGuest() {
+async function playAsGuest() {
+  showLoading();
   const highScore = Number(localStorage.getItem('blocksHighScore') || 0);
+  await delay(MIN_LOADING_MS);
   enterGame({ username: 'Guest', highScore, mode: 'guest', uid: null });
 }
 
