@@ -4,6 +4,9 @@ import { setSession, getSession, updateSessionHighScore } from "./session.js";
 import { showScreen, returnToDashboard } from "./screens.js";
 import { startRandomMatch, createRoom, joinRoom, cancelMatchmaking } from "./versus.js";
 import { renderLeaderboard } from "./leaderboard.js";
+import {
+  startRandomLobby, createLobbyRoom, joinLobbyRoom, cancelLobbyMatchmaking
+} from "./imposter.js";
 
 const DIFF_FIELD = { easy: 'highScoreEasy', hard: 'highScoreHard', expert: 'highScoreExpert' };
 
@@ -13,8 +16,52 @@ document.getElementById('dashSignOutBtn').addEventListener('click', () => {
   window.RA_signOut && window.RA_signOut();
 });
 
-document.getElementById('dashPlayBtn').addEventListener('click', () => {
+document.getElementById('dashPlayClassicBtn').addEventListener('click', () => {
   showScreen('modePickerScreen');
+});
+
+document.getElementById('dashPlayCustomBtn').addEventListener('click', () => {
+  showScreen('customModesScreen');
+});
+
+document.getElementById('customModesBackBtn').addEventListener('click', () => {
+  showScreen('dashboardScreen');
+});
+
+document.getElementById('customImposterBtn').addEventListener('click', () => {
+  showScreen('imposterPickerScreen');
+});
+
+document.getElementById('impPickerBackBtn').addEventListener('click', () => {
+  showScreen('customModesScreen');
+});
+
+document.getElementById('impRandomBtn').addEventListener('click', () => {
+  startRandomLobby();
+});
+
+document.getElementById('impCreateRoomBtn').addEventListener('click', () => {
+  createLobbyRoom();
+});
+
+document.getElementById('impJoinRoomBtn').addEventListener('click', () => {
+  document.getElementById('impJoinCodeInput').value = '';
+  document.getElementById('impJoinError').classList.add('hidden');
+  showScreen('impJoinScreen');
+});
+
+document.getElementById('impJoinBackBtn').addEventListener('click', () => {
+  showScreen('imposterPickerScreen');
+});
+
+document.getElementById('impJoinSubmitBtn').addEventListener('click', () => {
+  const code = document.getElementById('impJoinCodeInput').value.trim().toUpperCase();
+  joinLobbyRoom(code);
+});
+
+document.getElementById('impCancelBtn').addEventListener('click', () => {
+  cancelLobbyMatchmaking();
+  showScreen('imposterPickerScreen');
 });
 
 document.getElementById('modeBackBtn').addEventListener('click', () => {

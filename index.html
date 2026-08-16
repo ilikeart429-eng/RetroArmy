@@ -49,7 +49,8 @@
     <div class="panel auth-panel">
       <p class="auth-lead">YOUR BEST</p>
       <div class="dash-highscore" id="dashHighScore">0</div>
-      <button id="dashPlayBtn" class="auth-btn" type="button">PLAY</button>
+      <button id="dashPlayClassicBtn" class="auth-btn" type="button">PLAY CLASSIC</button>
+      <button id="dashPlayCustomBtn" class="auth-btn auth-btn-ghost" type="button">PLAY CUSTOM GAMEMODES</button>
     </div>
     <div class="panel auth-panel">
       <p class="auth-lead">HIGH SCORES</p>
@@ -148,6 +149,128 @@
       <div id="vsResultTitle" class="loading-studio">YOU WIN</div>
       <div id="vsResultSub" class="loading-text"></div>
       <button id="vsBackToDashBtn" class="auth-btn" type="button">BACK TO DASHBOARD</button>
+    </div>
+  </div>
+
+  <div id="customModesScreen" class="app hidden">
+    <h1 class="title">BLOCKS!</h1>
+    <div class="panel auth-panel">
+      <p class="auth-lead">CUSTOM GAMEMODES</p>
+      <button id="customImposterBtn" class="auth-btn" type="button">IMPOSTER (4 PLAYERS)</button>
+      <button id="customModesBackBtn" class="auth-btn auth-btn-ghost" type="button">BACK</button>
+    </div>
+  </div>
+
+  <div id="imposterPickerScreen" class="app hidden">
+    <h1 class="title">BLOCKS!</h1>
+    <div class="panel auth-panel">
+      <p class="auth-lead">IMPOSTER &mdash; 4 PLAYERS</p>
+      <button id="impRandomBtn" class="auth-btn" type="button">RANDOM LOBBY</button>
+      <button id="impCreateRoomBtn" class="auth-btn" type="button">CREATE PRIVATE LOBBY</button>
+      <button id="impJoinRoomBtn" class="auth-btn" type="button">JOIN PRIVATE LOBBY</button>
+      <button id="impPickerBackBtn" class="auth-btn auth-btn-ghost" type="button">BACK</button>
+    </div>
+  </div>
+
+  <div id="impJoinScreen" class="app hidden">
+    <h1 class="title">BLOCKS!</h1>
+    <div class="panel auth-panel">
+      <p class="auth-lead">ENTER LOBBY CODE</p>
+      <input id="impJoinCodeInput" class="auth-input vs-code-input" type="text" maxlength="6" autocomplete="off">
+      <div id="impJoinError" class="auth-error hidden"></div>
+      <button id="impJoinSubmitBtn" class="auth-btn" type="button">JOIN</button>
+      <button id="impJoinBackBtn" class="auth-btn auth-btn-ghost" type="button">BACK</button>
+    </div>
+  </div>
+
+  <div id="impWaitScreen" class="app hidden">
+    <h1 class="title">BLOCKS!</h1>
+    <div class="panel auth-panel">
+      <p class="auth-lead" id="impWaitLead">WAITING FOR PLAYERS...</p>
+      <div id="impRoomCodeDisplay" class="vs-code-input hidden"></div>
+      <div id="impWaitPlayers" class="imp-wait-players"></div>
+      <div id="impWaitError" class="auth-error hidden"></div>
+      <button id="impCancelBtn" class="auth-btn auth-btn-ghost" type="button">CANCEL</button>
+    </div>
+  </div>
+
+  <div id="impRoleScreen" class="loading-screen hidden">
+    <div id="impRoleTitle" class="loading-studio">YOU ARE CREW</div>
+    <div id="impRoleSub" class="loading-text"></div>
+  </div>
+
+  <div id="imposterApp" class="app hidden">
+    <h1 class="title">BLOCKS!</h1>
+    <div class="imp-timer-row">
+      <span class="label">TIME LEFT</span>
+      <span class="value" id="impTimer">60</span>
+    </div>
+    <div class="imp-grid">
+      <div class="imp-board-col" id="impCol0">
+        <div class="label imp-board-label" id="impLabel0"></div>
+        <div class="board-wrap imp-board-wrap">
+          <canvas id="impCanvas0" width="120" height="240"></canvas>
+        </div>
+        <div class="imp-mini-score" id="impScore0">0</div>
+      </div>
+      <div class="imp-board-col" id="impCol1">
+        <div class="label imp-board-label" id="impLabel1"></div>
+        <div class="board-wrap imp-board-wrap">
+          <canvas id="impCanvas1" width="120" height="240"></canvas>
+        </div>
+        <div class="imp-mini-score" id="impScore1">0</div>
+      </div>
+      <div class="imp-board-col" id="impCol2">
+        <div class="label imp-board-label" id="impLabel2"></div>
+        <div class="board-wrap imp-board-wrap">
+          <canvas id="impCanvas2" width="120" height="240"></canvas>
+        </div>
+        <div class="imp-mini-score" id="impScore2">0</div>
+      </div>
+      <div class="imp-board-col" id="impCol3">
+        <div class="label imp-board-label" id="impLabel3"></div>
+        <div class="board-wrap imp-board-wrap">
+          <canvas id="impCanvas3" width="120" height="240"></canvas>
+        </div>
+        <div class="imp-mini-score" id="impScore3">0</div>
+      </div>
+    </div>
+
+    <div id="impSabotagePanel" class="panel imp-sabotage-panel hidden">
+      <p class="auth-lead">SABOTAGE</p>
+      <div id="impSabotageTargets" class="imp-sabotage-targets"></div>
+      <div class="imp-sabotage-actions">
+        <button class="imp-sab-btn" data-action="garbage" type="button">GARBAGE</button>
+        <button class="imp-sab-btn" data-action="holes" type="button">HOLES</button>
+        <button class="imp-sab-btn" data-action="speed" type="button">SPEED UP</button>
+        <button class="imp-sab-btn" data-action="blind" type="button">BLIND</button>
+        <button class="imp-sab-btn" data-action="freeze" type="button">FREEZE</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="impLeftBtn" aria-label="Left">←</button>
+      <button id="impRightBtn" aria-label="Right">→</button>
+      <button id="impDownBtn" aria-label="Down">↓</button>
+      <button id="impRotateBtn" aria-label="Rotate">↻</button>
+    </div>
+  </div>
+
+  <div id="impVoteScreen" class="app hidden">
+    <h1 class="title">BLOCKS!</h1>
+    <div class="panel auth-panel">
+      <p class="auth-lead" id="impVoteLead">WHO IS THE IMPOSTER?</p>
+      <div id="impVoteOptions" class="imp-vote-options"></div>
+      <div id="impVoteStatus" class="lb-status"></div>
+    </div>
+  </div>
+
+  <div id="impResultScreen" class="app hidden">
+    <h1 class="title">BLOCKS!</h1>
+    <div class="panel auth-panel">
+      <p class="auth-lead" id="impResultLead">CREW WINS</p>
+      <p id="impResultSub" class="lb-status"></p>
+      <button id="impBackToDashBtn" class="auth-btn" type="button">BACK TO DASHBOARD</button>
     </div>
   </div>
 
