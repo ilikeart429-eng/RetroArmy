@@ -588,3 +588,163 @@ div.vs-code-input{
   transform:translate(3px,3px);
   box-shadow:none;
 }
+
+.imp-wait-players{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin:8px 0;
+}
+
+.imp-wait-row{
+  background:#0a0812;
+  border:2px solid var(--ink);
+  padding:8px 10px;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:1px;
+}
+
+.imp-timer-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin-bottom:10px;
+}
+
+.imp-timer-row .value{
+  font-size:20px;
+  font-weight:900;
+  color:var(--accent);
+}
+
+.imp-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  justify-content:center;
+  margin-bottom:12px;
+}
+
+.imp-board-col{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
+
+.imp-board-label{
+  font-size:9px;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.imp-board-wrap{
+  width:100%;
+  max-width:120px;
+}
+
+.imp-board-wrap canvas{
+  display:block;
+  width:100%;
+  height:auto;
+  background:#0a0812;
+}
+
+.imp-col-mine .board-wrap{
+  box-shadow:4px 4px 0 #000, 0 0 0 3px var(--accent) inset;
+}
+
+.imp-mini-score{
+  font-size:13px;
+  font-weight:800;
+  color:var(--accent2);
+}
+
+#imposterApp .controls{
+  max-width:280px;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.imp-sabotage-panel{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+.imp-sabotage-targets{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.imp-target-btn{
+  flex:1;
+  min-width:80px;
+  height:36px;
+  background:#3a3050;
+  border:3px solid var(--ink);
+  color:var(--text-dim);
+  font-family:inherit;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:1px;
+  cursor:pointer;
+  box-shadow:3px 3px 0 #000;
+}
+
+.imp-target-btn.active{
+  background:var(--danger);
+  color:#000;
+}
+
+.imp-target-btn:active{
+  transform:translate(3px,3px);
+  box-shadow:none;
+}
+
+.imp-sabotage-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+}
+
+.imp-sab-btn{
+  height:40px;
+  background:#3a3050;
+  border:3px solid var(--ink);
+  color:var(--text);
+  font-family:inherit;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:1px;
+  cursor:pointer;
+  box-shadow:3px 3px 0 #000;
+}
+
+.imp-sab-btn:active:not(:disabled){
+  transform:translate(3px,3px);
+  box-shadow:none;
+}
+
+.imp-sab-btn:disabled{
+  opacity:.5;
+  cursor:default;
+}
+
+.imp-vote-options{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin:8px 0;
+}
+
+.imp-vote-btn.active{
+  background:var(--accent2);
+  color:#000;
+}

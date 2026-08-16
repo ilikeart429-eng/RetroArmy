@@ -10,6 +10,14 @@ const SCREEN_IDS = [
   'vsJoinScreen',
   'vsWaitScreen',
   'versusApp',
+  'customModesScreen',
+  'imposterPickerScreen',
+  'impJoinScreen',
+  'impWaitScreen',
+  'impRoleScreen',
+  'imposterApp',
+  'impVoteScreen',
+  'impResultScreen',
   'gameApp'
 ];
 
