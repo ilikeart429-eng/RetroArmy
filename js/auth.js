@@ -8,7 +8,6 @@ import {
   doc,
   getDoc,
   setDoc,
-  updateDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { showDashboard } from "./dashboard.js";
@@ -85,19 +84,14 @@ function friendlyError(err) {
   }
 }
 
-function enterGame({ username, highScore, mode: playMode, uid }) {
-  window.saveHighScore = (score) => {
-    if (playMode === 'guest') {
-      localStorage.setItem('blocksHighScore', score);
-    } else if (uid) {
-      updateDoc(doc(db, 'users', uid), { highScore: score }).catch(() => {});
-    }
-  };
-
+function enterGame({ username, highScore, mode: playMode, uid, highScoreEasy, highScoreHard, highScoreExpert }) {
   hideLoading();
   authScreen.classList.add('hidden');
 
   if (playMode === 'guest') {
+    window.saveHighScore = (score) => {
+      localStorage.setItem('blocksHighScore', score);
+    };
     playerNameEl.textContent = 'GUEST';
     signOutBtn.classList.add('hidden');
     gameApp.classList.remove('hidden');
@@ -105,7 +99,7 @@ function enterGame({ username, highScore, mode: playMode, uid }) {
   } else {
     playerNameEl.textContent = username.toUpperCase();
     signOutBtn.classList.remove('hidden');
-    showDashboard({ uid, username, highScore: highScore || 0 });
+    showDashboard({ uid, username, highScore: highScore || 0, highScoreEasy, highScoreHard, highScoreExpert });
   }
 }
 
@@ -135,10 +129,16 @@ async function handleSignUp() {
     await setDoc(doc(db, 'users', cred.user.uid), {
       username,
       highScore: 0,
+      highScoreEasy: 0,
+      highScoreHard: 0,
+      highScoreExpert: 0,
       createdAt: serverTimestamp()
     });
     await delay(Math.max(0, MIN_LOADING_MS - (Date.now() - started)));
-    enterGame({ username, highScore: 0, mode: 'account', uid: cred.user.uid });
+    enterGame({
+      username, highScore: 0, highScoreEasy: 0, highScoreHard: 0, highScoreExpert: 0,
+      mode: 'account', uid: cred.user.uid
+    });
   } catch (err) {
     hideLoading();
     showError(friendlyError(err));
@@ -164,7 +164,15 @@ async function handleSignIn() {
     const snap = await getDoc(doc(db, 'users', cred.user.uid));
     const data = snap.exists() ? snap.data() : { username, highScore: 0 };
     await delay(Math.max(0, MIN_LOADING_MS - (Date.now() - started)));
-    enterGame({ username: data.username || username, highScore: data.highScore || 0, mode: 'account', uid: cred.user.uid });
+    enterGame({
+      username: data.username || username,
+      highScore: data.highScore || 0,
+      highScoreEasy: data.highScoreEasy || 0,
+      highScoreHard: data.highScoreHard || 0,
+      highScoreExpert: data.highScoreExpert || 0,
+      mode: 'account',
+      uid: cred.user.uid
+    });
   } catch (err) {
     hideLoading();
     showError(friendlyError(err));

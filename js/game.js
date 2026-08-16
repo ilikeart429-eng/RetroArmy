@@ -18,34 +18,57 @@ const SHAPES = [
   [[6,0,0],[6,6,6]],
   [[0,0,7],[7,7,7]],
 ];
-const COLORS = [null, "#2dd4f7", "#f9e94e", "#b96bf5", "#3ee06a", "#f75c5c", "#4d7dfa", "#f7a53e"];
+const EXPERT_SHAPES = [
+  [[0,8,0],[8,8,8],[0,8,0]],
+  [[9,0,0],[9,9,0],[0,9,9]],
+  [[10,10,10],[0,10,0],[0,10,0]],
+  [[0,11,11],[0,11,0],[11,11,0]],
+];
+const COLORS = [null, "#2dd4f7", "#f9e94e", "#b96bf5", "#3ee06a", "#f75c5c", "#4d7dfa", "#f7a53e", "#ff6fd8", "#66ffe0", "#ffe066", "#9d6bff"];
+const EXPERT_DUAL_CHANCE = 0.35;
 
 let score = 0, level = 1, lines = 0;
 let highScore = 0;
+let difficulty = 'easy';
 let paused = false, gameOver = false;
 let nextShape = randomShape();
 let holdShape = null, holdUsed = false;
-let piece = spawnFromQueue();
+let pieces = [];
 
 const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlayTitle');
 const overlaySub = document.getElementById('overlaySub');
 const overlayDashboardBtn = document.getElementById('overlayDashboardBtn');
 const gameAppEl = document.getElementById('gameApp');
+const diffBadgeEl = document.getElementById('diffBadge');
+
+function shapePool() {
+  return difficulty === 'expert' ? SHAPES.concat(EXPERT_SHAPES) : SHAPES;
+}
 
 function randomShape() {
-  return SHAPES[Math.random() * SHAPES.length | 0].map(row => row.slice());
+  const pool = shapePool();
+  return pool[Math.random() * pool.length | 0].map(row => row.slice());
 }
 
-function placeAt(shape) {
-  return {x: (COLS >> 1) - Math.ceil(shape[0].length / 2), y: 0, shape: shape.map(row => row.slice())};
+function placeAt(shape, sideHint) {
+  const w = shape[0].length;
+  let x;
+  if (sideHint === 'left') x = 0;
+  else if (sideHint === 'right') x = COLS - w;
+  else x = (COLS >> 1) - Math.ceil(w / 2);
+  return { x, y: 0, shape: shape.map(row => row.slice()) };
 }
 
-function spawnFromQueue() {
+function pullNextShape() {
   const shape = nextShape;
   nextShape = randomShape();
+  return shape;
+}
+
+function spawnFromQueue(sideHint) {
   holdUsed = false;
-  return placeAt(shape);
+  return placeAt(pullNextShape(), sideHint);
 }
 
 function shade(hex, amt) {
@@ -85,9 +108,11 @@ function draw() {
       else ctx.strokeRect(x * CELL + .5, y * CELL + .5, CELL - 1, CELL - 1);
     }
   }
-  for (let y = 0; y < piece.shape.length; y++) {
-    for (let x = 0; x < piece.shape[y].length; x++) {
-      if (piece.shape[y][x]) drawCell(ctx, piece.x + x, piece.y + y, CELL, piece.shape[y][x]);
+  for (const p of pieces) {
+    for (let y = 0; y < p.shape.length; y++) {
+      for (let x = 0; x < p.shape[y].length; x++) {
+        if (p.shape[y][x]) drawCell(ctx, p.x + x, p.y + y, CELL, p.shape[y][x]);
+      }
     }
   }
 
@@ -117,7 +142,7 @@ function drawPreview(context, canvasEl, shape) {
 function drawNext() { drawPreview(nextCtx, nextCanvas, nextShape); }
 function drawHold() { drawPreview(holdCtx, holdCanvas, holdShape); }
 
-function collides(nextX = piece.x, nextY = piece.y, shape = piece.shape) {
+function collides(p, nextX = p.x, nextY = p.y, shape = p.shape) {
   for (let y = 0; y < shape.length; y++) {
     for (let x = 0; x < shape[y].length; x++) {
       if (!shape[y][x]) continue;
@@ -129,10 +154,12 @@ function collides(nextX = piece.x, nextY = piece.y, shape = piece.shape) {
   return false;
 }
 
-function lockPiece() {
-  for (let y = 0; y < piece.shape.length; y++) {
-    for (let x = 0; x < piece.shape[y].length; x++) {
-      if (piece.shape[y][x]) board[piece.y + y][piece.x + x] = piece.shape[y][x];
+function handleLocks(locked) {
+  for (const p of locked) {
+    for (let y = 0; y < p.shape.length; y++) {
+      for (let x = 0; x < p.shape[y].length; x++) {
+        if (p.shape[y][x]) board[p.y + y][p.x + x] = p.shape[y][x];
+      }
     }
   }
 
@@ -146,44 +173,58 @@ function lockPiece() {
     }
   }
   if (cleared) {
-    score += [0, 100, 300, 500, 800][cleared] * level;
+    score += [0, 100, 300, 500, 800][Math.min(cleared, 4)] * level;
     lines += cleared;
     level = Math.floor(lines / 10) + 1;
     if (score > highScore) {
       highScore = score;
-      if (window.saveHighScore) window.saveHighScore(highScore);
+      if (window.saveHighScore) window.saveHighScore(highScore, difficulty);
     }
   }
 
-  piece = spawnFromQueue();
+  const rollDual = difficulty === 'expert' && pieces.length === 0 && Math.random() < EXPERT_DUAL_CHANCE;
+  let toSpawn = locked.length + (rollDual ? 1 : 0);
+  toSpawn = Math.min(toSpawn, 2 - pieces.length);
+  for (let i = 0; i < toSpawn; i++) {
+    const sideHint = toSpawn === 2 ? (i === 0 ? 'left' : 'right') : undefined;
+    const p = spawnFromQueue(sideHint);
+    pieces.push(p);
+    if (collides(p)) gameOver = true;
+  }
+
   drawNext();
-  if (collides()) endGame();
+  if (gameOver) endGame();
 }
 
 function rotate() {
   if (paused || gameOver) return;
-  const shape = piece.shape;
-  const rotated = shape[0].map((_, i) => shape.map(row => row[i]).reverse());
-  if (!collides(piece.x, piece.y, rotated)) piece.shape = rotated;
+  for (const p of pieces) {
+    const rotated = p.shape[0].map((_, i) => p.shape.map(row => row[i]).reverse());
+    if (!collides(p, p.x, p.y, rotated)) p.shape = rotated;
+  }
   draw();
 }
 
 function hardDrop() {
   if (paused || gameOver) return;
-  while (!collides(piece.x, piece.y + 1)) piece.y++;
-  lockPiece();
+  for (const p of pieces) {
+    while (!collides(p, p.x, p.y + 1)) p.y++;
+  }
+  const locked = pieces;
+  pieces = [];
+  handleLocks(locked);
   draw();
 }
 
 function moveLeft() {
   if (paused || gameOver) return;
-  if (!collides(piece.x - 1, piece.y)) piece.x--;
+  for (const p of pieces) if (!collides(p, p.x - 1, p.y)) p.x--;
   draw();
 }
 
 function moveRight() {
   if (paused || gameOver) return;
-  if (!collides(piece.x + 1, piece.y)) piece.x++;
+  for (const p of pieces) if (!collides(p, p.x + 1, p.y)) p.x++;
   draw();
 }
 
@@ -193,15 +234,16 @@ function softDrop() {
 }
 
 function hold() {
-  if (paused || gameOver || holdUsed) return;
+  if (paused || gameOver || holdUsed || pieces.length !== 1) return;
   holdUsed = true;
+  const p = pieces[0];
   if (holdShape) {
     const swap = holdShape;
-    holdShape = piece.shape.map(row => row.slice());
-    piece = placeAt(swap);
+    holdShape = p.shape.map(row => row.slice());
+    pieces[0] = placeAt(swap);
   } else {
-    holdShape = piece.shape.map(row => row.slice());
-    piece = placeAt(nextShape);
+    holdShape = p.shape.map(row => row.slice());
+    pieces[0] = placeAt(nextShape);
     nextShape = randomShape();
   }
   drawHold();
@@ -211,8 +253,16 @@ function hold() {
 
 function tick() {
   if (paused || gameOver) return;
-  if (!collides(piece.x, piece.y + 1)) piece.y++;
-  else lockPiece();
+  const falling = [];
+  const locked = [];
+  for (const p of pieces) {
+    if (!collides(p, p.x, p.y + 1)) { p.y++; falling.push(p); }
+    else locked.push(p);
+  }
+  if (locked.length) {
+    pieces = falling;
+    handleLocks(locked);
+  }
   draw();
 }
 
@@ -222,7 +272,7 @@ function endGame() {
   overlaySub.innerHTML = `SCORE ${score} &middot; LEVEL ${level} &middot; LINES ${lines}<br>tap to restart`;
   overlayDashboardBtn.classList.toggle('hidden', !window.RA_soloFromDashboard);
   overlay.classList.remove('hidden');
-  if (window.RA_onGameOver) window.RA_onGameOver({ score, level, lines, highScore });
+  if (window.RA_onGameOver) window.RA_onGameOver({ score, level, lines, highScore, difficulty });
 }
 
 function restart() {
@@ -230,7 +280,7 @@ function restart() {
   score = 0; level = 1; lines = 0;
   holdShape = null; holdUsed = false;
   nextShape = randomShape();
-  piece = spawnFromQueue();
+  pieces = [spawnFromQueue()];
   gameOver = false;
   paused = false;
   overlay.classList.add('hidden');
@@ -298,16 +348,26 @@ document.addEventListener('keydown', event => {
   else if (event.key.toLowerCase() === "c") hold();
 });
 
+function tickSpeed() {
+  if (difficulty === 'expert') return Math.max(70, 300 - (level - 1) * 30);
+  if (difficulty === 'hard') return Math.max(90, 380 - (level - 1) * 38);
+  return Math.max(120, 500 - (level - 1) * 40);
+}
+
 let loopId = 0;
 function loop(id) {
   if (id !== loopId) return;
   tick();
-  const speed = Math.max(120, 500 - (level - 1) * 40);
-  setTimeout(() => loop(id), speed);
+  setTimeout(() => loop(id), tickSpeed());
 }
 
-function startGame(initialHighScore) {
+function startGame(initialHighScore, diff) {
   highScore = initialHighScore || 0;
+  difficulty = diff || 'easy';
+  if (diffBadgeEl) {
+    diffBadgeEl.textContent = difficulty === 'easy' ? '' : difficulty.toUpperCase();
+    diffBadgeEl.classList.toggle('hidden', difficulty === 'easy');
+  }
   restart();
   loopId++;
   loop(loopId);
