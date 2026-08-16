@@ -388,6 +388,44 @@ function beginMatch(matchId, oppId, targetScore) {
 
 // ---------- Matchmaking ----------
 
+let randomScanInterval = null;
+
+function stopRandomScan() {
+  if (randomScanInterval) { clearInterval(randomScanInterval); randomScanInterval = null; }
+}
+
+async function tryPairWithWaiter(session) {
+  const q = query(collection(db, 'matchmakingQueue'), orderBy('joinedAt'), limit(10));
+  const snap = await getDocs(q);
+  const candidate = snap.docs.find(d => d.id !== session.uid && !d.data().matchId);
+  if (!candidate) return null;
+
+  const matchRef = doc(collection(db, 'matches'));
+  const queueRef = doc(db, 'matchmakingQueue', candidate.id);
+  try {
+    await runTransaction(db, async (tx) => {
+      const fresh = await tx.get(queueRef);
+      if (!fresh.exists() || fresh.data().matchId) throw new Error('taken');
+      tx.set(matchRef, {
+        status: 'active',
+        targetScore: DEFAULT_TARGET_SCORE,
+        createdAt: serverTimestamp(),
+        players: {
+          [session.uid]: { username: session.username },
+          [candidate.id]: { username: fresh.data().username }
+        },
+        playerIds: [session.uid, candidate.id],
+        winner: null,
+        endReason: null
+      });
+      tx.update(queueRef, { matchId: matchRef.id });
+    });
+    return { matchId: matchRef.id, oppId: candidate.id };
+  } catch (e) {
+    return null;
+  }
+}
+
 export async function startRandomMatch() {
   const session = getSession();
   if (!session) return;
@@ -397,40 +435,10 @@ export async function startRandomMatch() {
   document.getElementById('vsWaitError').classList.add('hidden');
 
   try {
-    const q = query(collection(db, 'matchmakingQueue'), orderBy('joinedAt'), limit(10));
-    const snap = await getDocs(q);
-    const candidate = snap.docs.find(d => d.id !== session.uid && !d.data().matchId);
-
-    if (candidate) {
-      const matchRef = doc(collection(db, 'matches'));
-      const queueRef = doc(db, 'matchmakingQueue', candidate.id);
-      let matched = false;
-      try {
-        await runTransaction(db, async (tx) => {
-          const fresh = await tx.get(queueRef);
-          if (!fresh.exists() || fresh.data().matchId) throw new Error('taken');
-          tx.set(matchRef, {
-            status: 'active',
-            targetScore: DEFAULT_TARGET_SCORE,
-            createdAt: serverTimestamp(),
-            players: {
-              [session.uid]: { username: session.username },
-              [candidate.id]: { username: fresh.data().username }
-            },
-            playerIds: [session.uid, candidate.id],
-            winner: null,
-            endReason: null
-          });
-          tx.update(queueRef, { matchId: matchRef.id });
-        });
-        matched = true;
-      } catch (e) {
-        matched = false;
-      }
-      if (matched) {
-        beginMatch(matchRef.id, candidate.id, DEFAULT_TARGET_SCORE);
-        return;
-      }
+    const found = await tryPairWithWaiter(session);
+    if (found) {
+      beginMatch(found.matchId, found.oppId, DEFAULT_TARGET_SCORE);
+      return;
     }
 
     await setDoc(doc(db, 'matchmakingQueue', session.uid), {
@@ -438,9 +446,11 @@ export async function startRandomMatch() {
       joinedAt: serverTimestamp(),
       matchId: null
     });
+
     queueUnsub = onSnapshot(doc(db, 'matchmakingQueue', session.uid), snap => {
       const data = snap.data();
       if (data && data.matchId) {
+        stopRandomScan();
         if (queueUnsub) { queueUnsub(); queueUnsub = null; }
         deleteDoc(doc(db, 'matchmakingQueue', session.uid)).catch(() => {});
         getDoc(doc(db, 'matches', data.matchId)).then(m => {
@@ -450,9 +460,25 @@ export async function startRandomMatch() {
           beginMatch(data.matchId, oppId, mdata.targetScore);
         });
       }
+    }, err => {
+      document.getElementById('vsWaitError').textContent = 'Connection error: ' + (err.message || err.code || 'unknown error');
+      document.getElementById('vsWaitError').classList.remove('hidden');
     });
+
+    // Keep actively re-scanning in case another player queued at nearly the
+    // same instant and both clients missed each other in the initial query.
+    randomScanInterval = setInterval(async () => {
+      if (!queueUnsub) return;
+      const retryFound = await tryPairWithWaiter(session);
+      if (retryFound) {
+        stopRandomScan();
+        if (queueUnsub) { queueUnsub(); queueUnsub = null; }
+        deleteDoc(doc(db, 'matchmakingQueue', session.uid)).catch(() => {});
+        beginMatch(retryFound.matchId, retryFound.oppId, DEFAULT_TARGET_SCORE);
+      }
+    }, 3000);
   } catch (err) {
-    document.getElementById('vsWaitError').textContent = 'Could not search for a match. Try again.';
+    document.getElementById('vsWaitError').textContent = 'Could not search for a match: ' + (err.message || err.code || 'unknown error');
     document.getElementById('vsWaitError').classList.remove('hidden');
   }
 }
@@ -460,24 +486,34 @@ export async function startRandomMatch() {
 export async function createRoom() {
   const session = getSession();
   if (!session) return;
-  const code = makeCode();
-  hostedRoomCode = code;
-  await setDoc(doc(db, 'matches', code), {
-    status: 'waiting',
-    targetScore: DEFAULT_TARGET_SCORE,
-    createdAt: serverTimestamp(),
-    players: { [session.uid]: { username: session.username } },
-    playerIds: [session.uid],
-    winner: null,
-    endReason: null
-  });
 
   showScreen('vsWaitScreen');
+  document.getElementById('vsWaitLead').textContent = 'CREATING ROOM...';
+  document.getElementById('vsRoomCodeDisplay').classList.add('hidden');
+  document.getElementById('vsWaitError').classList.add('hidden');
+
+  const code = makeCode();
+  try {
+    await setDoc(doc(db, 'matches', code), {
+      status: 'waiting',
+      targetScore: DEFAULT_TARGET_SCORE,
+      createdAt: serverTimestamp(),
+      players: { [session.uid]: { username: session.username } },
+      playerIds: [session.uid],
+      winner: null,
+      endReason: null
+    });
+  } catch (err) {
+    document.getElementById('vsWaitError').textContent = 'Could not create room: ' + (err.message || err.code || 'unknown error');
+    document.getElementById('vsWaitError').classList.remove('hidden');
+    return;
+  }
+  hostedRoomCode = code;
+
   document.getElementById('vsWaitLead').textContent = 'SHARE THIS CODE WITH A FRIEND';
   const codeEl = document.getElementById('vsRoomCodeDisplay');
   codeEl.textContent = code;
   codeEl.classList.remove('hidden');
-  document.getElementById('vsWaitError').classList.add('hidden');
 
   roomWatchUnsub = onSnapshot(doc(db, 'matches', code), snap => {
     const data = snap.data();
@@ -487,6 +523,9 @@ export async function createRoom() {
       const oppId = data.playerIds.find(id => id !== session.uid);
       beginMatch(code, oppId, data.targetScore);
     }
+  }, err => {
+    document.getElementById('vsWaitError').textContent = 'Connection error: ' + (err.message || err.code || 'unknown error');
+    document.getElementById('vsWaitError').classList.remove('hidden');
   });
 }
 
@@ -522,13 +561,15 @@ export async function joinRoom(code) {
     errEl.textContent =
       err.message === 'not-found' ? 'Room not found.' :
       err.message === 'self' ? 'You already created this room.' :
-      'That room is full or no longer available.';
+      err.message === 'full' ? 'That room is full or no longer available.' :
+      'Could not join room: ' + (err.message || err.code || 'unknown error');
     errEl.classList.remove('hidden');
   }
 }
 
 export async function cancelMatchmaking() {
   const session = getSession();
+  stopRandomScan();
   if (queueUnsub) { queueUnsub(); queueUnsub = null; }
   if (roomWatchUnsub) { roomWatchUnsub(); roomWatchUnsub = null; }
   if (session) {
