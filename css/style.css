@@ -481,3 +481,59 @@ div.vs-code-input{
   max-width:80%;
   text-align:center;
 }
+
+.lb-list{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.lb-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 8px;
+  background:#0a0812;
+  border:2px solid var(--ink);
+  font-size:13px;
+}
+
+.lb-rank{
+  width:22px;
+  font-weight:900;
+  color:var(--accent);
+}
+
+.lb-name{
+  flex:1;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  letter-spacing:1px;
+}
+
+.lb-score{
+  font-weight:900;
+  color:var(--accent2);
+}
+
+.lb-me{
+  border-color:var(--accent);
+  box-shadow:2px 2px 0 #000;
+}
+
+.lb-me .lb-name{color:var(--accent)}
+
+.lb-sep{
+  text-align:center;
+  font-size:11px;
+  letter-spacing:3px;
+  color:var(--text-dim);
+}
+
+.lb-status{
+  text-align:center;
+  font-size:11px;
+  letter-spacing:1px;
+  color:var(--text-dim);
+}

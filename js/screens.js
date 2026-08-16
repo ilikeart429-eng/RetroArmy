@@ -1,4 +1,5 @@
 import { getSession } from "./session.js";
+import { renderLeaderboard } from "./leaderboard.js";
 
 const SCREEN_IDS = [
   'authScreen',
@@ -25,4 +26,5 @@ export function returnToDashboard() {
     document.getElementById('dashHighScore').textContent = session.highScore || 0;
   }
   showScreen('dashboardScreen');
+  renderLeaderboard();
 }

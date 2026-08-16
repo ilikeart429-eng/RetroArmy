@@ -1,6 +1,7 @@
 import { setSession, getSession, updateSessionHighScore } from "./session.js";
 import { showScreen, returnToDashboard } from "./screens.js";
 import { startRandomMatch, createRoom, joinRoom, cancelMatchmaking } from "./versus.js";
+import { renderLeaderboard } from "./leaderboard.js";
 
 window.RA_backToDashboard = returnToDashboard;
 
@@ -68,4 +69,5 @@ export function showDashboard({ uid, username, highScore }) {
   document.getElementById('dashPlayerName').textContent = username.toUpperCase();
   document.getElementById('dashHighScore').textContent = highScore || 0;
   showScreen('dashboardScreen');
+  renderLeaderboard();
 }
