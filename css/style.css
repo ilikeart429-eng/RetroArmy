@@ -216,9 +216,13 @@ body{
 .player-row{
   display:flex;
   align-items:center;
-  justify-content:space-between;
+  gap:8px;
   margin:-6px 0 14px;
   min-height:20px;
+}
+
+.player-row .signout-btn{
+  margin-left:auto;
 }
 
 .player-name{
@@ -488,4 +492,91 @@ div.vs-code-input{
 #vsResultSub{
   max-width:80%;
   text-align:center;
+}
+
+.diff-badge{
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:1px;
+  color:var(--accent);
+  border:2px solid var(--accent);
+  padding:2px 6px;
+}
+
+.lb-tabs{
+  display:flex;
+  gap:6px;
+  margin-bottom:10px;
+}
+
+.lb-tab{
+  flex:1;
+  height:36px;
+  background:#3a3050;
+  border:3px solid var(--ink);
+  color:var(--text-dim);
+  font-family:inherit;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:1px;
+  cursor:pointer;
+  box-shadow:3px 3px 0 #000;
+}
+
+.lb-tab.active{
+  background:var(--accent2);
+  color:#000;
+}
+
+.lb-tab:active{
+  transform:translate(3px,3px);
+  box-shadow:none;
+}
+
+.lb-list{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-height:120px;
+  margin-bottom:12px;
+}
+
+.lb-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:#0a0812;
+  border:2px solid var(--ink);
+  padding:8px 10px;
+}
+
+.lb-rank{
+  font-size:14px;
+  font-weight:900;
+  color:var(--accent);
+  width:20px;
+}
+
+.lb-name{
+  flex:1;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:1px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.lb-score{
+  font-size:14px;
+  font-weight:900;
+  color:var(--accent2);
+}
+
+.lb-status{
+  text-align:center;
+  font-size:12px;
+  color:var(--text-dim);
+  letter-spacing:1px;
+  padding:20px 0;
 }

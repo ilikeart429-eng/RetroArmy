@@ -4,6 +4,8 @@ const SCREEN_IDS = [
   'authScreen',
   'dashboardScreen',
   'modePickerScreen',
+  'difficultyPickerScreen',
+  'leaderboardScreen',
   'versusPickerScreen',
   'vsJoinScreen',
   'vsWaitScreen',
