@@ -78,7 +78,7 @@ export async function renderLeaderboard() {
     status.classList.toggle('hidden', list.childElementCount > 0);
     if (!list.childElementCount) status.textContent = 'NO SCORES YET';
   } catch (err) {
-    status.textContent = 'Could not load leaderboard: ' + (err.message || err.code || 'unknown error');
+    status.textContent = 'Could not load high scores: ' + (err.message || err.code || 'unknown error');
     status.classList.remove('hidden');
   }
 }
