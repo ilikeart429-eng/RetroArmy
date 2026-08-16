@@ -16,7 +16,9 @@ const SHAPES = [
   [[6,0,0],[6,6,6]],
   [[0,0,7],[7,7,7]],
 ];
-const COLORS = [null, "#2dd4f7", "#f9e94e", "#b96bf5", "#3ee06a", "#f75c5c", "#4d7dfa", "#f7a53e"];
+const COLORS = [null, "#2dd4f7", "#f9e94e", "#b96bf5", "#3ee06a", "#f75c5c", "#4d7dfa", "#f7a53e", "#8a8a99"];
+const GARBAGE_CELL = 8;
+const GARBAGE_PER_CLEAR = [0, 0, 1, 1, 2];
 const DEFAULT_TARGET_SCORE = 5000;
 const SYNC_INTERVAL_MS = 150;
 
@@ -34,6 +36,7 @@ let queueUnsub = null;
 let roomWatchUnsub = null;
 let hostedRoomCode = null;
 let myCtx = null, oppCtx = null;
+let garbageApplied = 0;
 
 function randomShape() {
   return SHAPES[Math.random() * SHAPES.length | 0].map(row => row.slice());
@@ -87,6 +90,7 @@ function lockPiece(e, onScore) {
     e.score += [0, 100, 300, 500, 800][cleared] * e.level;
     e.lines += cleared;
     e.level = Math.floor(e.lines / 10) + 1;
+    e.garbageSent += GARBAGE_PER_CLEAR[cleared];
     onScore && onScore();
   }
   e.piece = spawnFromQueue(e);
@@ -99,10 +103,26 @@ function newEngine() {
     score: 0, level: 1, lines: 0,
     nextShape: randomShape(),
     piece: null,
-    gameOver: false
+    gameOver: false,
+    garbageSent: 0
   };
   e.piece = spawnFromQueue(e);
   return e;
+}
+
+function scrambledRow() {
+  const row = Array(COLS).fill(GARBAGE_CELL);
+  row[Math.random() * COLS | 0] = 0;
+  return row;
+}
+
+function receiveGarbage(e, count) {
+  for (let i = 0; i < count; i++) {
+    if (e.board[0].some(cell => cell)) { e.gameOver = true; return; }
+    e.board.shift();
+    e.board.push(scrambledRow());
+  }
+  while (e.piece && collidesFor(e)) e.piece.y--;
 }
 
 function shade(hex, amt) {
@@ -260,6 +280,7 @@ async function pushState() {
     board: flatBoard,
     score: engine.score,
     gameOver: engine.gameOver,
+    garbageSent: engine.garbageSent,
     updatedAt: serverTimestamp()
   };
   if (engine.piece) {
@@ -340,6 +361,7 @@ function beginMatch(matchId, oppId, targetScore) {
   targetScoreVal = targetScore || DEFAULT_TARGET_SCORE;
   matchEnded = false;
   dirty = false;
+  garbageApplied = 0;
   engine = newEngine();
 
   const myCanvas = document.getElementById('vsMyCanvas');
@@ -374,6 +396,17 @@ function beginMatch(matchId, oppId, targetScore) {
     const data = snap.data();
     if (!data || !data.board) return;
     document.getElementById('vsOppScore').textContent = data.score || 0;
+    const sent = data.garbageSent || 0;
+    if (sent > garbageApplied) {
+      const incoming = sent - garbageApplied;
+      garbageApplied = sent;
+      if (engine && !engine.gameOver && !matchEnded) {
+        receiveGarbage(engine, incoming);
+        render();
+        markDirty();
+        if (engine.gameOver) { onTopOut(); return; }
+      }
+    }
     const oppBoard = unflattenBoard(data.board);
     const oppPiece = data.pieceShape ? {
       x: data.pieceX, y: data.pieceY, shape: unflattenPiece(data.pieceShape, data.pieceW)
