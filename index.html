@@ -40,6 +40,96 @@
     <div class="loading-text">LOADING<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></div>
   </div>
 
+  <div id="dashboardScreen" class="app hidden">
+    <h1 class="title">BLOCKS!</h1>
+    <div class="player-row">
+      <span id="dashPlayerName" class="player-name"></span>
+      <button id="dashSignOutBtn" class="signout-btn" type="button">SIGN OUT</button>
+    </div>
+    <div class="panel auth-panel">
+      <p class="auth-lead">HIGH SCORE</p>
+      <div class="dash-highscore" id="dashHighScore">0</div>
+      <button id="dashPlayBtn" class="auth-btn" type="button">PLAY</button>
+    </div>
+  </div>
+
+  <div id="modePickerScreen" class="app hidden">
+    <h1 class="title">BLOCKS!</h1>
+    <div class="panel auth-panel">
+      <p class="auth-lead">CHOOSE A MODE</p>
+      <button id="modeSoloBtn" class="auth-btn" type="button">1 PLAYER</button>
+      <button id="modeVersusBtn" class="auth-btn" type="button">1V1</button>
+      <button id="modeBackBtn" class="auth-btn auth-btn-ghost" type="button">BACK</button>
+    </div>
+  </div>
+
+  <div id="versusPickerScreen" class="app hidden">
+    <h1 class="title">BLOCKS!</h1>
+    <div class="panel auth-panel">
+      <p class="auth-lead">1V1 MATCH</p>
+      <button id="vsRandomBtn" class="auth-btn" type="button">RANDOM OPPONENT</button>
+      <button id="vsCreateRoomBtn" class="auth-btn" type="button">CREATE PRIVATE ROOM</button>
+      <button id="vsJoinRoomBtn" class="auth-btn" type="button">JOIN PRIVATE ROOM</button>
+      <button id="vsPickerBackBtn" class="auth-btn auth-btn-ghost" type="button">BACK</button>
+    </div>
+  </div>
+
+  <div id="vsJoinScreen" class="app hidden">
+    <h1 class="title">BLOCKS!</h1>
+    <div class="panel auth-panel">
+      <p class="auth-lead">ENTER ROOM CODE</p>
+      <input id="vsJoinCodeInput" class="auth-input vs-code-input" type="text" maxlength="6" autocomplete="off">
+      <div id="vsJoinError" class="auth-error hidden"></div>
+      <button id="vsJoinSubmitBtn" class="auth-btn" type="button">JOIN</button>
+      <button id="vsJoinBackBtn" class="auth-btn auth-btn-ghost" type="button">BACK</button>
+    </div>
+  </div>
+
+  <div id="vsWaitScreen" class="app hidden">
+    <h1 class="title">BLOCKS!</h1>
+    <div class="panel auth-panel">
+      <p class="auth-lead" id="vsWaitLead">SEARCHING FOR OPPONENT...</p>
+      <div id="vsRoomCodeDisplay" class="vs-code-input hidden"></div>
+      <div id="vsWaitError" class="auth-error hidden"></div>
+      <button id="vsCancelBtn" class="auth-btn auth-btn-ghost" type="button">CANCEL</button>
+    </div>
+  </div>
+
+  <div id="versusApp" class="app hidden">
+    <h1 class="title">BLOCKS!</h1>
+    <div class="vs-target-row">
+      <span class="label">TARGET SCORE</span>
+      <span class="value" id="vsTargetScore">0</span>
+    </div>
+    <div class="vs-boards">
+      <div class="vs-board-col">
+        <div class="label" id="vsMyLabel">YOU</div>
+        <div class="board-wrap vs-board-wrap">
+          <canvas id="vsMyCanvas" width="160" height="320"></canvas>
+        </div>
+        <div class="vs-mini-score" id="vsMyScore">0</div>
+      </div>
+      <div class="vs-board-col">
+        <div class="label" id="vsOppLabel">OPPONENT</div>
+        <div class="board-wrap vs-board-wrap">
+          <canvas id="vsOppCanvas" width="160" height="320"></canvas>
+        </div>
+        <div class="vs-mini-score" id="vsOppScore">0</div>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="vsLeftBtn" aria-label="Left">←</button>
+      <button id="vsRightBtn" aria-label="Right">→</button>
+      <button id="vsDownBtn" aria-label="Down">↓</button>
+      <button id="vsRotateBtn" aria-label="Rotate">↻</button>
+    </div>
+    <div id="vsResultOverlay" class="loading-screen hidden">
+      <div id="vsResultTitle" class="loading-studio">YOU WIN</div>
+      <div id="vsResultSub" class="loading-text"></div>
+      <button id="vsBackToDashBtn" class="auth-btn" type="button">BACK TO DASHBOARD</button>
+    </div>
+  </div>
+
   <div id="gameApp" class="app hidden">
     <h1 class="title">BLOCKS!</h1>
 
@@ -66,6 +156,7 @@
         <div id="overlay" class="overlay hidden">
           <div id="overlayTitle">PAUSED</div>
           <div id="overlaySub"></div>
+          <button id="overlayDashboardBtn" class="auth-btn auth-btn-ghost hidden" type="button">BACK TO DASHBOARD</button>
         </div>
       </div>
 

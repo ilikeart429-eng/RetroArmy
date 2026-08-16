@@ -1,23 +1,17 @@
-import { firebaseConfig } from "./firebase-config.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { auth, db } from "./firebase.js";
 import {
-  getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import {
-  getFirestore,
   doc,
   getDoc,
   setDoc,
   updateDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { showDashboard } from "./dashboard.js";
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 const EMAIL_DOMAIN = "@retroarmy.local";
@@ -92,12 +86,6 @@ function friendlyError(err) {
 }
 
 function enterGame({ username, highScore, mode: playMode, uid }) {
-  playerNameEl.textContent = playMode === 'guest' ? 'GUEST' : username.toUpperCase();
-  signOutBtn.classList.toggle('hidden', playMode === 'guest');
-  hideLoading();
-  authScreen.classList.add('hidden');
-  gameApp.classList.remove('hidden');
-
   window.saveHighScore = (score) => {
     if (playMode === 'guest') {
       localStorage.setItem('blocksHighScore', score);
@@ -106,7 +94,19 @@ function enterGame({ username, highScore, mode: playMode, uid }) {
     }
   };
 
-  window.startGame(highScore || 0);
+  hideLoading();
+  authScreen.classList.add('hidden');
+
+  if (playMode === 'guest') {
+    playerNameEl.textContent = 'GUEST';
+    signOutBtn.classList.add('hidden');
+    gameApp.classList.remove('hidden');
+    window.startGame(highScore || 0);
+  } else {
+    playerNameEl.textContent = username.toUpperCase();
+    signOutBtn.classList.remove('hidden');
+    showDashboard({ uid, username, highScore: highScore || 0 });
+  }
 }
 
 async function handleSignUp() {
@@ -190,7 +190,9 @@ formView.addEventListener('submit', (e) => {
   if (mode === 'signup') handleSignUp();
   else handleSignIn();
 });
-signOutBtn.addEventListener('click', async () => {
+async function handleSignOut() {
   await signOut(auth);
   window.location.reload();
-});
+}
+signOutBtn.addEventListener('click', handleSignOut);
+window.RA_signOut = handleSignOut;

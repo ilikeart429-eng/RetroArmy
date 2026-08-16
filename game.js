@@ -30,6 +30,8 @@ let piece = spawnFromQueue();
 const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlayTitle');
 const overlaySub = document.getElementById('overlaySub');
+const overlayDashboardBtn = document.getElementById('overlayDashboardBtn');
+const gameAppEl = document.getElementById('gameApp');
 
 function randomShape() {
   return SHAPES[Math.random() * SHAPES.length | 0].map(row => row.slice());
@@ -217,8 +219,10 @@ function tick() {
 function endGame() {
   gameOver = true;
   overlayTitle.textContent = "GAME OVER";
-  overlaySub.textContent = `Score ${score} — tap to restart`;
+  overlaySub.innerHTML = `SCORE ${score} &middot; LEVEL ${level} &middot; LINES ${lines}<br>tap to restart`;
+  overlayDashboardBtn.classList.toggle('hidden', !window.RA_soloFromDashboard);
   overlay.classList.remove('hidden');
+  if (window.RA_onGameOver) window.RA_onGameOver({ score, level, lines, highScore });
 }
 
 function restart() {
@@ -252,6 +256,10 @@ overlay.addEventListener('click', () => {
   if (gameOver) restart();
   else if (paused) togglePause();
 });
+overlayDashboardBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (window.RA_backToDashboard) window.RA_backToDashboard();
+});
 
 document.getElementById('rotateBtn').addEventListener('click', rotate);
 document.getElementById('holdPanel').addEventListener('click', hold);
@@ -277,6 +285,7 @@ bindRepeat(document.getElementById('rightBtn'), moveRight);
 bindRepeat(document.getElementById('downBtn'), softDrop);
 
 document.addEventListener('keydown', event => {
+  if (gameAppEl.classList.contains('hidden')) return;
   if (["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " "].includes(event.key)) {
     event.preventDefault();
   }
@@ -289,17 +298,18 @@ document.addEventListener('keydown', event => {
   else if (event.key.toLowerCase() === "c") hold();
 });
 
-function loop() {
+let loopId = 0;
+function loop(id) {
+  if (id !== loopId) return;
   tick();
   const speed = Math.max(120, 500 - (level - 1) * 40);
-  setTimeout(loop, speed);
+  setTimeout(() => loop(id), speed);
 }
 
 function startGame(initialHighScore) {
   highScore = initialHighScore || 0;
-  drawNext();
-  drawHold();
-  draw();
-  loop();
+  restart();
+  loopId++;
+  loop(loopId);
 }
 window.startGame = startGame;
