@@ -5,6 +5,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { getSession } from "./session.js";
 import { showScreen, returnToDashboard } from "./screens.js";
+import { computeCoins, awardCoins, IMPOSTER_COIN_MULTIPLIER } from "./coins.js";
 
 const COLS = 10, ROWS = 20, CELL = 12;
 const LOBBY_SIZE = 4;
@@ -605,6 +606,8 @@ function handleFinished(data) {
   document.getElementById('impResultSub').textContent =
     `THE IMPOSTER WAS ${imposterName.toUpperCase()}. ` +
     (ejectedName ? `THE GROUP EJECTED ${ejectedName.toUpperCase()}.` : 'NO ONE WAS EJECTED.');
+
+  if (won && myEngine) awardCoins(computeCoins(myEngine.score, IMPOSTER_COIN_MULTIPLIER));
 }
 
 document.getElementById('impBackToDashBtn').addEventListener('click', () => {

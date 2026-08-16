@@ -32,7 +32,7 @@ export function returnToDashboard() {
   const session = getSession();
   if (session) {
     document.getElementById('dashPlayerName').textContent = session.username.toUpperCase();
-    document.getElementById('dashHighScore').textContent = session.highScore || 0;
+    document.getElementById('dashBlockCoins').textContent = session.blockCoins || 0;
   }
   showScreen('dashboardScreen');
   renderLeaderboard();
