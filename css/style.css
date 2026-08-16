@@ -216,9 +216,13 @@ body{
 .player-row{
   display:flex;
   align-items:center;
-  justify-content:space-between;
+  gap:8px;
   margin:-6px 0 14px;
   min-height:20px;
+}
+
+.player-row .signout-btn{
+  margin-left:auto;
 }
 
 .player-name{
@@ -544,4 +548,43 @@ div.vs-code-input{
   font-size:11px;
   letter-spacing:1px;
   color:var(--text-dim);
+}
+
+.diff-badge{
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:1px;
+  color:var(--accent);
+  border:2px solid var(--accent);
+  padding:2px 6px;
+}
+
+.lb-tabs{
+  display:flex;
+  gap:6px;
+  margin-bottom:6px;
+}
+
+.lb-tab{
+  flex:1;
+  height:32px;
+  background:#3a3050;
+  border:3px solid var(--ink);
+  color:var(--text-dim);
+  font-family:inherit;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:1px;
+  cursor:pointer;
+  box-shadow:3px 3px 0 #000;
+}
+
+.lb-tab.active{
+  background:var(--accent2);
+  color:#000;
+}
+
+.lb-tab:active{
+  transform:translate(3px,3px);
+  box-shadow:none;
 }

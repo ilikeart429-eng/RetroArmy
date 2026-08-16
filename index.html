@@ -53,6 +53,11 @@
     </div>
     <div class="panel auth-panel">
       <p class="auth-lead">HIGH SCORES</p>
+      <div class="lb-tabs">
+        <button id="lbEasyTab" class="lb-tab" type="button">EASY</button>
+        <button id="lbHardTab" class="lb-tab" type="button">HARD</button>
+        <button id="lbExpertTab" class="lb-tab" type="button">EXPERT</button>
+      </div>
       <div id="leaderboardStatus" class="lb-status hidden"></div>
       <div id="leaderboardList" class="lb-list"></div>
     </div>
@@ -65,6 +70,17 @@
       <button id="modeSoloBtn" class="auth-btn" type="button">1 PLAYER</button>
       <button id="modeVersusBtn" class="auth-btn" type="button">2 PLAYER</button>
       <button id="modeBackBtn" class="auth-btn auth-btn-ghost" type="button">BACK</button>
+    </div>
+  </div>
+
+  <div id="difficultyPickerScreen" class="app hidden">
+    <h1 class="title">BLOCKS!</h1>
+    <div class="panel auth-panel">
+      <p class="auth-lead">CHOOSE DIFFICULTY</p>
+      <button id="diffEasyBtn" class="auth-btn" type="button">EASY</button>
+      <button id="diffHardBtn" class="auth-btn" type="button">HARD</button>
+      <button id="diffExpertBtn" class="auth-btn" type="button">EXPERT</button>
+      <button id="diffBackBtn" class="auth-btn auth-btn-ghost" type="button">BACK</button>
     </div>
   </div>
 
@@ -140,6 +156,7 @@
 
     <div class="player-row">
       <span id="playerName" class="player-name"></span>
+      <span id="diffBadge" class="diff-badge hidden"></span>
       <button id="signOutBtn" class="signout-btn hidden" type="button">SIGN OUT</button>
     </div>
 
