@@ -206,6 +206,11 @@ body{
   .side-panel{width:110px}
 }
 
+@media (max-width:350px){
+  .vs-board-wrap-mine{width:160px}
+  .vs-board-wrap-opp{width:120px}
+}
+
 .hidden{display:none !important}
 
 .player-row{
@@ -433,7 +438,7 @@ div.vs-code-input{
 }
 
 .vs-board-col{
-  flex:1;
+  flex:0 0 auto;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -448,9 +453,12 @@ div.vs-code-input{
   white-space:nowrap;
 }
 
-.vs-board-wrap{
-  width:100%;
-  max-width:160px;
+.vs-board-wrap-mine{
+  width:190px;
+}
+
+.vs-board-wrap-opp{
+  width:140px;
 }
 
 .vs-board-wrap #vsMyCanvas,

@@ -6,7 +6,7 @@ import {
 import { getSession } from "./session.js";
 import { showScreen, returnToDashboard } from "./screens.js";
 
-const COLS = 10, ROWS = 20, CELL = 16;
+const COLS = 10, ROWS = 20, CELL_MINE = 19, CELL_OPP = 14;
 const SHAPES = [
   [[1,1,1,1]],
   [[2,2],[2,2]],
@@ -133,26 +133,26 @@ function drawCell(context, x, y, size, colorIndex) {
   context.strokeRect(px + .5, py + .5, s - 1, s - 1);
 }
 
-function drawBoard(context, boardArr, piece) {
-  context.clearRect(0, 0, COLS * CELL, ROWS * CELL);
+function drawBoard(context, boardArr, piece, cellSize) {
+  context.clearRect(0, 0, COLS * cellSize, ROWS * cellSize);
   context.strokeStyle = "rgba(255,255,255,0.05)";
   for (let y = 0; y < ROWS; y++) {
     for (let x = 0; x < COLS; x++) {
-      if (boardArr[y][x]) drawCell(context, x, y, CELL, boardArr[y][x]);
-      else context.strokeRect(x * CELL + .5, y * CELL + .5, CELL - 1, CELL - 1);
+      if (boardArr[y][x]) drawCell(context, x, y, cellSize, boardArr[y][x]);
+      else context.strokeRect(x * cellSize + .5, y * cellSize + .5, cellSize - 1, cellSize - 1);
     }
   }
   if (piece) {
     for (let y = 0; y < piece.shape.length; y++) {
       for (let x = 0; x < piece.shape[y].length; x++) {
-        if (piece.shape[y][x]) drawCell(context, piece.x + x, piece.y + y, CELL, piece.shape[y][x]);
+        if (piece.shape[y][x]) drawCell(context, piece.x + x, piece.y + y, cellSize, piece.shape[y][x]);
       }
     }
   }
 }
 
 function render() {
-  if (myCtx && engine) drawBoard(myCtx, engine.board, engine.piece);
+  if (myCtx && engine) drawBoard(myCtx, engine.board, engine.piece, CELL_MINE);
 }
 
 function markDirty() { dirty = true; }
@@ -378,7 +378,7 @@ function beginMatch(matchId, oppId, targetScore) {
     const oppPiece = data.pieceShape ? {
       x: data.pieceX, y: data.pieceY, shape: unflattenPiece(data.pieceShape, data.pieceW)
     } : null;
-    drawBoard(oppCtx, oppBoard, oppPiece);
+    drawBoard(oppCtx, oppBoard, oppPiece, CELL_OPP);
   });
 
   markDirty();
