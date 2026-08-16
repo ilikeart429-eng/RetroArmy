@@ -279,12 +279,18 @@ function applyIncomingSabotage(type) {
 async function issueSabotage(type, targetUid) {
   if (!currentLobbyId || !targetUid) return;
   const session = getSession();
+  const statusEl = document.getElementById('impSabotageStatus');
   try {
     await addDoc(collection(db, 'imposterLobbies', currentLobbyId, 'sabotage'), {
       targetUid, type, issuedBy: session.uid, issuedAt: serverTimestamp()
     });
     cooldownUntil[type] = Date.now() + SABOTAGE_COOLDOWN_MS;
-  } catch (e) {}
+    statusEl.textContent = 'SABOTAGE SENT';
+    statusEl.classList.remove('hidden');
+  } catch (e) {
+    statusEl.textContent = 'Sabotage failed: ' + (e.message || e.code || 'unknown error');
+    statusEl.classList.remove('hidden');
+  }
 }
 
 function updateCooldownUI() {
@@ -457,6 +463,7 @@ function startRound(session) {
   });
 
   document.getElementById('impSabotagePanel').classList.toggle('hidden', myRole !== 'imposter');
+  document.getElementById('impSabotageStatus').classList.add('hidden');
   if (myRole === 'imposter') {
     renderSabotageTargets();
     cooldownUiInterval = setInterval(updateCooldownUI, 250);
