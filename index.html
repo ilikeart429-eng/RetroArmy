@@ -63,7 +63,7 @@
     <div class="panel auth-panel">
       <p class="auth-lead">CHOOSE A MODE</p>
       <button id="modeSoloBtn" class="auth-btn" type="button">1 PLAYER</button>
-      <button id="modeVersusBtn" class="auth-btn" type="button">1V1</button>
+      <button id="modeVersusBtn" class="auth-btn" type="button">2 PLAYER</button>
       <button id="modeBackBtn" class="auth-btn auth-btn-ghost" type="button">BACK</button>
     </div>
   </div>
@@ -71,7 +71,7 @@
   <div id="versusPickerScreen" class="app hidden">
     <h1 class="title">BLOCKS!</h1>
     <div class="panel auth-panel">
-      <p class="auth-lead">1V1 MATCH</p>
+      <p class="auth-lead">2 PLAYER MATCH</p>
       <button id="vsRandomBtn" class="auth-btn" type="button">RANDOM OPPONENT</button>
       <button id="vsCreateRoomBtn" class="auth-btn" type="button">CREATE PRIVATE ROOM</button>
       <button id="vsJoinRoomBtn" class="auth-btn" type="button">JOIN PRIVATE ROOM</button>
@@ -107,17 +107,17 @@
       <span class="value" id="vsTargetScore">0</span>
     </div>
     <div class="vs-boards">
-      <div class="vs-board-col">
+      <div class="vs-board-col vs-board-col-mine">
         <div class="label" id="vsMyLabel">YOU</div>
-        <div class="board-wrap vs-board-wrap">
-          <canvas id="vsMyCanvas" width="160" height="320"></canvas>
+        <div class="board-wrap vs-board-wrap vs-board-wrap-mine">
+          <canvas id="vsMyCanvas" width="190" height="380"></canvas>
         </div>
         <div class="vs-mini-score" id="vsMyScore">0</div>
       </div>
-      <div class="vs-board-col">
+      <div class="vs-board-col vs-board-col-opp">
         <div class="label" id="vsOppLabel">OPPONENT</div>
-        <div class="board-wrap vs-board-wrap">
-          <canvas id="vsOppCanvas" width="160" height="320"></canvas>
+        <div class="board-wrap vs-board-wrap vs-board-wrap-opp">
+          <canvas id="vsOppCanvas" width="140" height="280"></canvas>
         </div>
         <div class="vs-mini-score" id="vsOppScore">0</div>
       </div>
