@@ -5,6 +5,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { getSession } from "./session.js";
 import { showScreen, returnToDashboard } from "./screens.js";
+import { computeCoins, awardCoins, VERSUS_COIN_MULTIPLIER } from "./coins.js";
 
 const COLS = 10, ROWS = 20, CELL_MINE = 19, CELL_OPP = 14;
 const SHAPES = [
@@ -326,6 +327,7 @@ function endMatch(didWin, reason) {
     reason === 'target' ? (didWin ? 'YOU REACHED THE TARGET SCORE FIRST' : 'OPPONENT REACHED THE TARGET SCORE FIRST') :
     reason === 'topout' ? (didWin ? 'OPPONENT TOPPED OUT' : 'YOU TOPPED OUT') : '';
   overlayEl.classList.remove('hidden');
+  if (didWin && engine) awardCoins(computeCoins(engine.score, VERSUS_COIN_MULTIPLIER));
 }
 
 async function onTargetReached() {

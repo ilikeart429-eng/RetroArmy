@@ -405,6 +405,14 @@ body{
   text-shadow:3px 3px 0 #000;
 }
 
+.dash-coins{
+  color:var(--accent);
+}
+
+.dash-coins::before{
+  content:"\1FA99  ";
+}
+
 .vs-code-input{
   text-align:center;
   letter-spacing:6px;

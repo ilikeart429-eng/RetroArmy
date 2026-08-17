@@ -85,7 +85,7 @@ function friendlyError(err) {
   }
 }
 
-function enterGame({ username, highScore, mode: playMode, uid, highScoreEasy, highScoreHard, highScoreExpert }) {
+function enterGame({ username, highScore, mode: playMode, uid, highScoreEasy, highScoreHard, highScoreExpert, blockCoins }) {
   hideLoading();
   authScreen.classList.add('hidden');
 
@@ -100,7 +100,7 @@ function enterGame({ username, highScore, mode: playMode, uid, highScoreEasy, hi
   } else {
     playerNameEl.textContent = username.toUpperCase();
     signOutBtn.classList.remove('hidden');
-    showDashboard({ uid, username, highScore: highScore || 0, highScoreEasy, highScoreHard, highScoreExpert });
+    showDashboard({ uid, username, highScore: highScore || 0, highScoreEasy, highScoreHard, highScoreExpert, blockCoins });
   }
 }
 
@@ -133,11 +133,12 @@ async function handleSignUp() {
       highScoreEasy: 0,
       highScoreHard: 0,
       highScoreExpert: 0,
+      blockCoins: 0,
       createdAt: serverTimestamp()
     });
     await delay(Math.max(0, MIN_LOADING_MS - (Date.now() - started)));
     enterGame({
-      username, highScore: 0, highScoreEasy: 0, highScoreHard: 0, highScoreExpert: 0,
+      username, highScore: 0, highScoreEasy: 0, highScoreHard: 0, highScoreExpert: 0, blockCoins: 0,
       mode: 'account', uid: cred.user.uid
     });
   } catch (err) {
@@ -169,6 +170,7 @@ async function handleSignIn() {
     if (data.highScoreEasy === undefined) backfill.highScoreEasy = 0;
     if (data.highScoreHard === undefined) backfill.highScoreHard = 0;
     if (data.highScoreExpert === undefined) backfill.highScoreExpert = 0;
+    if (data.blockCoins === undefined) backfill.blockCoins = 0;
     if (Object.keys(backfill).length) {
       updateDoc(doc(db, 'users', cred.user.uid), backfill).catch(() => {});
     }
@@ -180,6 +182,7 @@ async function handleSignIn() {
       highScoreEasy: data.highScoreEasy || 0,
       highScoreHard: data.highScoreHard || 0,
       highScoreExpert: data.highScoreExpert || 0,
+      blockCoins: data.blockCoins || 0,
       mode: 'account',
       uid: cred.user.uid
     });

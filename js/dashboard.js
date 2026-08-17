@@ -7,6 +7,7 @@ import { renderLeaderboard } from "./leaderboard.js";
 import {
   startRandomLobby, createLobbyRoom, joinLobbyRoom, cancelLobbyMatchmaking
 } from "./imposter.js";
+import { computeCoins, awardCoins, DIFF_COIN_MULTIPLIER } from "./coins.js";
 
 const DIFF_FIELD = { easy: 'highScoreEasy', hard: 'highScoreHard', expert: 'highScoreExpert' };
 
@@ -89,6 +90,7 @@ function startSolo(difficulty) {
   window.RA_onGameOver = ({ score }) => {
     const s = getSession();
     if (s && score > (s.highScore || 0)) updateSessionHighScore(score);
+    awardCoins(computeCoins(score, DIFF_COIN_MULTIPLIER[difficulty]));
   };
   window.saveHighScore = (score) => {
     const s = getSession();
@@ -142,17 +144,18 @@ document.getElementById('vsCancelBtn').addEventListener('click', () => {
   showScreen('versusPickerScreen');
 });
 
-export function showDashboard({ uid, username, highScore, highScoreEasy, highScoreHard, highScoreExpert }) {
+export function showDashboard({ uid, username, highScore, highScoreEasy, highScoreHard, highScoreExpert, blockCoins }) {
   setSession({
     uid,
     username,
     highScore: highScore || 0,
     highScoreEasy: highScoreEasy || 0,
     highScoreHard: highScoreHard || 0,
-    highScoreExpert: highScoreExpert || 0
+    highScoreExpert: highScoreExpert || 0,
+    blockCoins: blockCoins || 0
   });
   document.getElementById('dashPlayerName').textContent = username.toUpperCase();
-  document.getElementById('dashHighScore').textContent = highScore || 0;
+  document.getElementById('dashBlockCoins').textContent = blockCoins || 0;
   showScreen('dashboardScreen');
   renderLeaderboard('easy');
 }

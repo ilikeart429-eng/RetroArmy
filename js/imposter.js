@@ -5,6 +5,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { getSession } from "./session.js";
 import { showScreen, returnToDashboard } from "./screens.js";
+import { computeCoins, awardCoins, IMPOSTER_COIN_MULTIPLIER } from "./coins.js";
 
 const COLS = 10, ROWS = 20, CELL = 12;
 const LOBBY_SIZE = 4;
@@ -279,12 +280,18 @@ function applyIncomingSabotage(type) {
 async function issueSabotage(type, targetUid) {
   if (!currentLobbyId || !targetUid) return;
   const session = getSession();
+  const statusEl = document.getElementById('impSabotageStatus');
   try {
     await addDoc(collection(db, 'imposterLobbies', currentLobbyId, 'sabotage'), {
       targetUid, type, issuedBy: session.uid, issuedAt: serverTimestamp()
     });
     cooldownUntil[type] = Date.now() + SABOTAGE_COOLDOWN_MS;
-  } catch (e) {}
+    statusEl.textContent = 'SABOTAGE SENT';
+    statusEl.classList.remove('hidden');
+  } catch (e) {
+    statusEl.textContent = 'Sabotage failed: ' + (e.message || e.code || 'unknown error');
+    statusEl.classList.remove('hidden');
+  }
 }
 
 function updateCooldownUI() {
@@ -457,6 +464,7 @@ function startRound(session) {
   });
 
   document.getElementById('impSabotagePanel').classList.toggle('hidden', myRole !== 'imposter');
+  document.getElementById('impSabotageStatus').classList.add('hidden');
   if (myRole === 'imposter') {
     renderSabotageTargets();
     cooldownUiInterval = setInterval(updateCooldownUI, 250);
@@ -598,6 +606,8 @@ function handleFinished(data) {
   document.getElementById('impResultSub').textContent =
     `THE IMPOSTER WAS ${imposterName.toUpperCase()}. ` +
     (ejectedName ? `THE GROUP EJECTED ${ejectedName.toUpperCase()}.` : 'NO ONE WAS EJECTED.');
+
+  if (won && myEngine) awardCoins(computeCoins(myEngine.score, IMPOSTER_COIN_MULTIPLIER));
 }
 
 document.getElementById('impBackToDashBtn').addEventListener('click', () => {
