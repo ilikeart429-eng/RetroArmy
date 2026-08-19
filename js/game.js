@@ -25,7 +25,6 @@ const EXPERT_SHAPES = [
   [[0,11,11],[0,11,0],[11,11,0]],
 ];
 const COLORS = [null, "#2dd4f7", "#f9e94e", "#b96bf5", "#3ee06a", "#f75c5c", "#4d7dfa", "#f7a53e", "#ff6fd8", "#66ffe0", "#ffe066", "#9d6bff"];
-const EXPERT_DUAL_CHANCE = 0.35;
 
 let score = 0, level = 1, lines = 0;
 let highScore = 0;
@@ -51,13 +50,9 @@ function randomShape() {
   return pool[Math.random() * pool.length | 0].map(row => row.slice());
 }
 
-function placeAt(shape, sideHint) {
+function placeAt(shape) {
   const w = shape[0].length;
-  let x;
-  if (sideHint === 'left') x = 0;
-  else if (sideHint === 'right') x = COLS - w;
-  else x = (COLS >> 1) - Math.ceil(w / 2);
-  return { x, y: 0, shape: shape.map(row => row.slice()) };
+  return { x: (COLS >> 1) - Math.ceil(w / 2), y: 0, shape: shape.map(row => row.slice()) };
 }
 
 function pullNextShape() {
@@ -66,9 +61,9 @@ function pullNextShape() {
   return shape;
 }
 
-function spawnFromQueue(sideHint) {
+function spawnFromQueue() {
   holdUsed = false;
-  return placeAt(pullNextShape(), sideHint);
+  return placeAt(pullNextShape());
 }
 
 function shade(hex, amt) {
@@ -182,12 +177,8 @@ function handleLocks(locked) {
     }
   }
 
-  const rollDual = difficulty === 'expert' && pieces.length === 0 && Math.random() < EXPERT_DUAL_CHANCE;
-  let toSpawn = locked.length + (rollDual ? 1 : 0);
-  toSpawn = Math.min(toSpawn, 2 - pieces.length);
-  for (let i = 0; i < toSpawn; i++) {
-    const sideHint = toSpawn === 2 ? (i === 0 ? 'left' : 'right') : undefined;
-    const p = spawnFromQueue(sideHint);
+  for (let i = 0; i < locked.length; i++) {
+    const p = spawnFromQueue();
     pieces.push(p);
     if (collides(p)) gameOver = true;
   }
@@ -349,8 +340,8 @@ document.addEventListener('keydown', event => {
 });
 
 function tickSpeed() {
-  if (difficulty === 'expert') return Math.max(70, 300 - (level - 1) * 30);
-  if (difficulty === 'hard') return Math.max(90, 380 - (level - 1) * 38);
+  if (difficulty === 'expert') return Math.max(50, 220 - (level - 1) * 26);
+  if (difficulty === 'hard') return Math.max(75, 320 - (level - 1) * 34);
   return Math.max(120, 500 - (level - 1) * 40);
 }
 
