@@ -6,6 +6,7 @@
 const data = window.__RA_DATA || { accounts: {}, collections: {} };
 const collections = data.collections;
 let uidCounter = 0;
+let docCounter = 0;
 
 const clone = value => JSON.parse(JSON.stringify(value));
 const fail = code => Object.assign(new Error(code), { code });
@@ -32,6 +33,7 @@ export async function signInWithEmailAndPassword(auth, email, password) {
 export async function signOut() {}
 
 export function serverTimestamp() { return '<server-timestamp>'; }
+export function increment(by) { return { __increment: by }; }
 export function collection(db, name) { return { name }; }
 export function doc(dbOrCollection, name, id) {
   return dbOrCollection.name
@@ -49,7 +51,16 @@ export async function setDoc(ref, value) { docs(ref.name)[ref.id] = clone(value)
 export async function updateDoc(ref, patch) {
   const record = docs(ref.name)[ref.id];
   if (!record) throw fail('not-found');
-  Object.assign(record, clone(patch));
+  for (const [field, value] of Object.entries(patch)) {
+    record[field] = value && value.__increment !== undefined
+      ? (record[field] || 0) + value.__increment
+      : clone(value);
+  }
+}
+export async function addDoc(collectionRef, value) {
+  const id = `stub-doc-${++docCounter}`;
+  docs(collectionRef.name)[id] = clone(value);
+  return { name: collectionRef.name, id };
 }
 export async function deleteDoc(ref) { delete docs(ref.name)[ref.id]; }
 

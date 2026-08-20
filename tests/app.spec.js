@@ -16,16 +16,32 @@ test('guest goes straight into a solo game', async ({ page }) => {
   await expect(page.locator('#signOutBtn')).toBeHidden();
 });
 
-test('signing in shows the dashboard with the high score leaderboard', async ({ page }) => {
+test('signing in shows the dashboard with block coins and the easy leaderboard', async ({ page }) => {
   await signIn(page);
   await expect(page.locator('#dashPlayerName')).toHaveText('RETROPLAYER');
-  await expect(page.locator('#dashHighScore')).toHaveText('5200');
+  await expect(page.locator('#dashBlockCoins')).toHaveText(String(ME.blockCoins));
 
   const rows = page.locator('#leaderboardList .lb-row');
   await expect(rows).toHaveCount(5);
   await expect(rows.first()).toContainText('NOVA');
+  await expect(page.locator('#lbEasyTab')).toHaveClass(/active/);
   await expect(page.locator('.lb-me')).toContainText('RETROPLAYER');
+  await expect(page.locator('.lb-me .lb-score')).toHaveText('5200');
   await expect(page.locator('#leaderboardStatus')).toBeHidden();
+});
+
+test('leaderboard tabs switch between difficulty high scores', async ({ page }) => {
+  await signIn(page);
+
+  await page.locator('#lbHardTab').click();
+  const rows = page.locator('#leaderboardList .lb-row');
+  await expect(rows.first()).toContainText('RETROPLAYER');
+  await expect(rows.first().locator('.lb-score')).toHaveText('8000');
+  await expect(page.locator('#lbHardTab')).toHaveClass(/active/);
+
+  await page.locator('#lbExpertTab').click();
+  await expect(rows.first()).toContainText('NOVA');
+  await expect(page.locator('.lb-me .lb-score')).toHaveText('600');
 });
 
 test('leaderboard appends your rank when you are outside the top five', async ({ page }) => {
@@ -57,6 +73,15 @@ test('dropping pieces fills the board', async ({ page }) => {
   expect(await board.evaluate(canvas => canvas.toDataURL())).not.toBe(empty);
   await expect(page.locator('#level')).toHaveText('1');
   await expect(page.locator('#highscore')).toHaveText('5200');
+  await expect(page.locator('#diffBadge')).toBeHidden();
+});
+
+test('expert mode carries its own badge and high score', async ({ page }) => {
+  await signIn(page);
+  await startSoloGame(page, 'expert');
+
+  await expect(page.locator('#diffBadge')).toHaveText('EXPERT');
+  await expect(page.locator('#highscore')).toHaveText('600');
 });
 
 test('pause button freezes and resumes the game', async ({ page }) => {
