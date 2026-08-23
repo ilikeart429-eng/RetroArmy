@@ -1,0 +1,16 @@
+{
+  "name": "retroarmy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BLOCKS! - a retro block-stacking game",
+  "scripts": {
+    "serve": "node tests/server.js",
+    "test": "tests/run-in-docker.sh",
+    "test:update-screenshots": "tests/run-in-docker.sh --update-snapshots",
+    "test:local": "playwright test"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
+  }
+}
