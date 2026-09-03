@@ -13,24 +13,41 @@ const fail = code => Object.assign(new Error(code), { code });
 const docs = name => (collections[name] = collections[name] || {});
 
 export function initializeApp() { return { name: 'stub' }; }
-export function getAuth() { return { currentUser: null }; }
 export function getFirestore() { return { stub: true }; }
+
+// Stands in for the session Firebase keeps in IndexedDB: survives a reload, and
+// is shared between the three module instances this file is served as.
+const SESSION_KEY = 'stub-auth-user';
+const currentUser = () => JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+const startSession = user => {
+  localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+  return { user };
+};
+
+export function getAuth() {
+  return { get currentUser() { return currentUser(); } };
+}
+
+export function onAuthStateChanged(auth, callback) {
+  Promise.resolve().then(() => callback(currentUser()));
+  return () => {};
+}
 
 export async function createUserWithEmailAndPassword(auth, email, password) {
   if (data.accounts[email]) throw fail('auth/email-already-in-use');
   if (password.length < 6) throw fail('auth/weak-password');
   const uid = `stub-uid-${++uidCounter}`;
   data.accounts[email] = { password, uid };
-  return { user: { uid } };
+  return startSession({ uid, email });
 }
 
 export async function signInWithEmailAndPassword(auth, email, password) {
   const account = data.accounts[email];
   if (!account || account.password !== password) throw fail('auth/invalid-credential');
-  return { user: { uid: account.uid } };
+  return startSession({ uid: account.uid, email });
 }
 
-export async function signOut() {}
+export async function signOut() { localStorage.removeItem(SESSION_KEY); }
 
 export function serverTimestamp() { return '<server-timestamp>'; }
 export function increment(by) { return { __increment: by }; }
