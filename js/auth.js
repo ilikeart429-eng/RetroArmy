@@ -2,6 +2,7 @@ import { auth, db } from "./firebase.js";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import {
@@ -16,6 +17,7 @@ import { showDashboard } from "./dashboard.js";
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 const EMAIL_DOMAIN = "@retroarmy.local";
 const usernameToEmail = name => name.trim().toLowerCase() + EMAIL_DOMAIN;
+const emailToUsername = email => (email || '').replace(EMAIL_DOMAIN, '');
 
 const authScreen = document.getElementById('authScreen');
 const loadingScreen = document.getElementById('loadingScreen');
@@ -158,6 +160,34 @@ async function handleSignUp() {
   }
 }
 
+async function loadProfile(uid, fallbackUsername) {
+  const snap = await getDoc(doc(db, 'users', uid));
+  const data = snap.exists() ? snap.data() : { username: fallbackUsername, highScore: 0 };
+
+  const backfill = {};
+  if (data.highScoreEasy === undefined) backfill.highScoreEasy = 0;
+  if (data.highScoreHard === undefined) backfill.highScoreHard = 0;
+  if (data.highScoreExpert === undefined) backfill.highScoreExpert = 0;
+  if (data.blockCoins === undefined) backfill.blockCoins = 0;
+  if (data.displayName === undefined) backfill.displayName = data.username || fallbackUsername;
+  if (Object.keys(backfill).length) {
+    updateDoc(doc(db, 'users', uid), backfill).catch(() => {});
+  }
+
+  return {
+    username: data.username || fallbackUsername,
+    highScore: data.highScore || 0,
+    highScoreEasy: data.highScoreEasy || 0,
+    highScoreHard: data.highScoreHard || 0,
+    highScoreExpert: data.highScoreExpert || 0,
+    blockCoins: data.blockCoins || 0,
+    displayName: data.displayName || data.username || fallbackUsername,
+    avatarThumb: data.avatarThumb || null,
+    mode: 'account',
+    uid
+  };
+}
+
 async function handleSignIn() {
   const username = usernameInput.value.trim();
   const password = passwordInput.value;
@@ -172,32 +202,9 @@ async function handleSignIn() {
   const started = Date.now();
   try {
     const cred = await signInWithEmailAndPassword(auth, usernameToEmail(username), password);
-    const snap = await getDoc(doc(db, 'users', cred.user.uid));
-    const data = snap.exists() ? snap.data() : { username, highScore: 0 };
-
-    const backfill = {};
-    if (data.highScoreEasy === undefined) backfill.highScoreEasy = 0;
-    if (data.highScoreHard === undefined) backfill.highScoreHard = 0;
-    if (data.highScoreExpert === undefined) backfill.highScoreExpert = 0;
-    if (data.blockCoins === undefined) backfill.blockCoins = 0;
-    if (data.displayName === undefined) backfill.displayName = data.username || username;
-    if (Object.keys(backfill).length) {
-      updateDoc(doc(db, 'users', cred.user.uid), backfill).catch(() => {});
-    }
-
+    const profile = await loadProfile(cred.user.uid, username);
     await delay(Math.max(0, MIN_LOADING_MS - (Date.now() - started)));
-    enterGame({
-      username: data.username || username,
-      highScore: data.highScore || 0,
-      highScoreEasy: data.highScoreEasy || 0,
-      highScoreHard: data.highScoreHard || 0,
-      highScoreExpert: data.highScoreExpert || 0,
-      blockCoins: data.blockCoins || 0,
-      displayName: data.displayName || data.username || username,
-      avatarThumb: data.avatarThumb || null,
-      mode: 'account',
-      uid: cred.user.uid
-    });
+    enterGame(profile);
   } catch (err) {
     hideLoading();
     showError(friendlyError(err));
@@ -229,3 +236,24 @@ async function handleSignOut() {
 }
 signOutBtn.addEventListener('click', handleSignOut);
 window.RA_signOut = handleSignOut;
+
+// The page boots on the loading screen while Firebase restores whatever session
+// it kept from last visit; only when there is none do we ask for credentials.
+let sessionRestored = false;
+onAuthStateChanged(auth, async (user) => {
+  if (sessionRestored) return;
+  sessionRestored = true;
+
+  if (!user) {
+    hideLoading();
+    authScreen.classList.remove('hidden');
+    return;
+  }
+
+  try {
+    enterGame(await loadProfile(user.uid, emailToUsername(user.email)));
+  } catch {
+    hideLoading();
+    authScreen.classList.remove('hidden');
+  }
+});

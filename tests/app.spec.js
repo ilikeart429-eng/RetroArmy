@@ -55,6 +55,16 @@ test('leaderboard appends your rank when you are outside the top five', async ({
   await expect(page.locator('.lb-me .lb-score')).toHaveText('100');
 });
 
+test('a signed-in player is still signed in after a reload', async ({ page }) => {
+  await signIn(page);
+  await page.reload();
+
+  await expect(page.locator('#dashboardScreen')).toBeVisible();
+  await expect(page.locator('#dashPlayerName')).toHaveText(ME.username.toUpperCase());
+  await expect(page.locator('#dashBlockCoins')).toHaveText(String(ME.blockCoins));
+  await expect(page.locator('#authScreen')).toBeHidden();
+});
+
 test('signing out returns to the auth screen', async ({ page }) => {
   await signIn(page);
   await page.locator('#dashSignOutBtn').click();
