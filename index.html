@@ -44,6 +44,8 @@
     <h1 class="title">BLOCKS!</h1>
     <div class="player-row">
       <span id="dashPlayerName" class="player-name"></span>
+      <button id="dashAccountBtn" class="icon-btn" type="button" aria-label="Account" title="Account">&#128100;</button>
+      <button id="dashSettingsBtn" class="icon-btn" type="button" aria-label="Settings" title="Settings">&#9881;</button>
       <button id="dashSignOutBtn" class="signout-btn" type="button">SIGN OUT</button>
     </div>
     <div class="panel auth-panel">
@@ -85,6 +87,76 @@
     </div>
   </div>
 
+  <div id="profileScreen" class="app hidden">
+    <h1 class="title">BLOCKS!</h1>
+    <div class="panel auth-panel">
+      <p class="auth-lead">YOUR PROFILE</p>
+      <div class="avatar-picker">
+        <div class="avatar-preview" id="profileAvatarPreview">
+          <img id="profileAvatarImg" class="avatar-img hidden" alt="avatar">
+          <span id="profileAvatarInitial" class="avatar-initial"></span>
+        </div>
+        <input id="profileAvatarInput" type="file" accept="image/*" class="hidden">
+        <button id="profileChooseAvatarBtn" class="auth-btn auth-btn-ghost" type="button">CHOOSE PHOTO</button>
+        <button id="profileRemoveAvatarBtn" class="auth-btn auth-btn-ghost" type="button">REMOVE PHOTO</button>
+      </div>
+      <label class="auth-label" for="profileDisplayNameInput">DISPLAY NAME</label>
+      <input id="profileDisplayNameInput" class="auth-input" type="text" maxlength="20">
+      <div id="profileError" class="auth-error hidden"></div>
+      <div id="profileStatus" class="lb-status hidden"></div>
+      <button id="profileSaveBtn" class="auth-btn" type="button">SAVE</button>
+      <button id="profileBackBtn" class="auth-btn auth-btn-ghost" type="button">BACK</button>
+    </div>
+  </div>
+
+  <div id="settingsScreen" class="app hidden">
+    <h1 class="title">BLOCKS!</h1>
+    <div class="panel auth-panel">
+      <p class="auth-lead">SETTINGS</p>
+      <div class="setting-row">
+        <span class="setting-label">LIGHT MODE</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="settingThemeToggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">SHOW FPS</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="settingFpsToggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">SOUND</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="settingSoundToggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <button id="settingsBackBtn" class="auth-btn auth-btn-ghost" type="button">BACK</button>
+    </div>
+  </div>
+
+  <div id="profileCardOverlay" class="loading-screen hidden">
+    <div class="panel auth-panel profile-card-panel">
+      <div class="avatar-preview avatar-preview-lg" id="profileCardAvatar">
+        <img id="profileCardAvatarImg" class="avatar-img hidden" alt="avatar">
+        <span id="profileCardAvatarInitial" class="avatar-initial"></span>
+      </div>
+      <div id="profileCardName" class="profile-card-name">PLAYER</div>
+      <div id="profileCardCoins" class="profile-card-coins">0 BLOCK COINS</div>
+      <div class="stats-panel">
+        <div class="stat-row"><span>EASY</span><span id="profileCardEasy">0</span></div>
+        <div class="stat-row"><span>HARD</span><span id="profileCardHard">0</span></div>
+        <div class="stat-row"><span>EXPERT</span><span id="profileCardExpert">0</span></div>
+      </div>
+      <button id="profileCardCloseBtn" class="auth-btn auth-btn-ghost" type="button">CLOSE</button>
+    </div>
+  </div>
+
+  <div id="fpsCounter" class="fps-counter hidden">0 FPS</div>
+
   <div id="versusPickerScreen" class="app hidden">
     <h1 class="title">BLOCKS!</h1>
     <div class="panel auth-panel">
@@ -125,14 +197,14 @@
     </div>
     <div class="vs-boards">
       <div class="vs-board-col vs-board-col-mine">
-        <div class="label" id="vsMyLabel">YOU</div>
+        <div class="label label-clickable" id="vsMyLabel">YOU</div>
         <div class="board-wrap vs-board-wrap vs-board-wrap-mine">
           <canvas id="vsMyCanvas" width="190" height="380"></canvas>
         </div>
         <div class="vs-mini-score" id="vsMyScore">0</div>
       </div>
       <div class="vs-board-col vs-board-col-opp">
-        <div class="label" id="vsOppLabel">OPPONENT</div>
+        <div class="label label-clickable" id="vsOppLabel">OPPONENT</div>
         <div class="board-wrap vs-board-wrap vs-board-wrap-opp">
           <canvas id="vsOppCanvas" width="140" height="280"></canvas>
         </div>
@@ -207,28 +279,28 @@
     </div>
     <div class="imp-grid">
       <div class="imp-board-col" id="impCol0">
-        <div class="label imp-board-label" id="impLabel0"></div>
+        <div class="label imp-board-label label-clickable" id="impLabel0"></div>
         <div class="board-wrap imp-board-wrap">
           <canvas id="impCanvas0" width="120" height="240"></canvas>
         </div>
         <div class="imp-mini-score" id="impScore0">0</div>
       </div>
       <div class="imp-board-col" id="impCol1">
-        <div class="label imp-board-label" id="impLabel1"></div>
+        <div class="label imp-board-label label-clickable" id="impLabel1"></div>
         <div class="board-wrap imp-board-wrap">
           <canvas id="impCanvas1" width="120" height="240"></canvas>
         </div>
         <div class="imp-mini-score" id="impScore1">0</div>
       </div>
       <div class="imp-board-col" id="impCol2">
-        <div class="label imp-board-label" id="impLabel2"></div>
+        <div class="label imp-board-label label-clickable" id="impLabel2"></div>
         <div class="board-wrap imp-board-wrap">
           <canvas id="impCanvas2" width="120" height="240"></canvas>
         </div>
         <div class="imp-mini-score" id="impScore2">0</div>
       </div>
       <div class="imp-board-col" id="impCol3">
-        <div class="label imp-board-label" id="impLabel3"></div>
+        <div class="label imp-board-label label-clickable" id="impLabel3"></div>
         <div class="board-wrap imp-board-wrap">
           <canvas id="impCanvas3" width="120" height="240"></canvas>
         </div>

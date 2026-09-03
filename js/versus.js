@@ -6,6 +6,7 @@ import {
 import { getSession } from "./session.js";
 import { showScreen, returnToDashboard } from "./screens.js";
 import { computeCoins, awardCoins, VERSUS_COIN_MULTIPLIER } from "./coins.js";
+import { showProfileCard } from "./profileCard.js";
 
 const COLS = 10, ROWS = 20, CELL_MINE = 19, CELL_OPP = 14;
 const SHAPES = [
@@ -244,6 +245,13 @@ function bindControlsOnce() {
     teardownMatch();
     returnToDashboard();
   });
+  document.getElementById('vsMyLabel').addEventListener('click', () => {
+    const session = getSession();
+    if (session) showProfileCard(session.uid);
+  });
+  document.getElementById('vsOppLabel').addEventListener('click', () => {
+    if (opponentUid) showProfileCard(opponentUid);
+  });
   document.addEventListener('keydown', event => {
     if (!isVersusVisible()) return;
     if (["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " "].includes(event.key)) {
@@ -372,7 +380,7 @@ function beginMatch(matchId, oppId, targetScore) {
   oppCtx = oppCanvas.getContext('2d');
 
   document.getElementById('vsTargetScore').textContent = targetScoreVal;
-  document.getElementById('vsMyLabel').textContent = session.username.toUpperCase();
+  document.getElementById('vsMyLabel').textContent = (session.displayName || session.username).toUpperCase();
   document.getElementById('vsOppLabel').textContent = 'OPPONENT';
   document.getElementById('vsMyScore').textContent = '0';
   document.getElementById('vsOppScore').textContent = '0';
@@ -380,7 +388,7 @@ function beginMatch(matchId, oppId, targetScore) {
   oppCtx.clearRect(0, 0, oppCanvas.width, oppCanvas.height);
 
   getDoc(doc(db, 'users', oppId)).then(s => {
-    if (s.exists()) document.getElementById('vsOppLabel').textContent = (s.data().username || 'OPPONENT').toUpperCase();
+    if (s.exists()) document.getElementById('vsOppLabel').textContent = (s.data().displayName || s.data().username || 'OPPONENT').toUpperCase();
   }).catch(() => {});
 
   showScreen('versusApp');

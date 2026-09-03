@@ -8,6 +8,8 @@ import {
   startRandomLobby, createLobbyRoom, joinLobbyRoom, cancelLobbyMatchmaking
 } from "./imposter.js";
 import { computeCoins, awardCoins, DIFF_COIN_MULTIPLIER } from "./coins.js";
+import { showProfileScreen } from "./profile.js";
+import { prepareSettingsScreen } from "./settings.js";
 
 const DIFF_FIELD = { easy: 'highScoreEasy', hard: 'highScoreHard', expert: 'highScoreExpert' };
 
@@ -15,6 +17,19 @@ window.RA_backToDashboard = returnToDashboard;
 
 document.getElementById('dashSignOutBtn').addEventListener('click', () => {
   window.RA_signOut && window.RA_signOut();
+});
+
+document.getElementById('dashAccountBtn').addEventListener('click', () => {
+  showProfileScreen();
+});
+
+document.getElementById('dashSettingsBtn').addEventListener('click', () => {
+  prepareSettingsScreen();
+  showScreen('settingsScreen');
+});
+
+document.getElementById('settingsBackBtn').addEventListener('click', () => {
+  showScreen('dashboardScreen');
 });
 
 document.getElementById('dashPlayClassicBtn').addEventListener('click', () => {
@@ -144,7 +159,10 @@ document.getElementById('vsCancelBtn').addEventListener('click', () => {
   showScreen('versusPickerScreen');
 });
 
-export function showDashboard({ uid, username, highScore, highScoreEasy, highScoreHard, highScoreExpert, blockCoins }) {
+export function showDashboard({
+  uid, username, highScore, highScoreEasy, highScoreHard, highScoreExpert, blockCoins,
+  displayName, avatarThumb
+}) {
   setSession({
     uid,
     username,
@@ -152,9 +170,11 @@ export function showDashboard({ uid, username, highScore, highScoreEasy, highSco
     highScoreEasy: highScoreEasy || 0,
     highScoreHard: highScoreHard || 0,
     highScoreExpert: highScoreExpert || 0,
-    blockCoins: blockCoins || 0
+    blockCoins: blockCoins || 0,
+    displayName: displayName || username,
+    avatarThumb: avatarThumb || null
   });
-  document.getElementById('dashPlayerName').textContent = username.toUpperCase();
+  document.getElementById('dashPlayerName').textContent = (displayName || username).toUpperCase();
   document.getElementById('dashBlockCoins').textContent = blockCoins || 0;
   showScreen('dashboardScreen');
   renderLeaderboard('easy');

@@ -11,3 +11,7 @@ export function getSession() {
 export function updateSessionHighScore(newHighScore) {
   if (session) session.highScore = newHighScore;
 }
+
+export function updateSessionProfile(updates) {
+  if (session) Object.assign(session, updates);
+}
