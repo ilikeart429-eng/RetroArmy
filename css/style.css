@@ -4,9 +4,23 @@
   --ink:#000;
   --text:#f4efe6;
   --text-dim:#9a8fb0;
+  --text-on-dark:#f4efe6;
+  --text-dim-on-dark:#9a8fb0;
   --accent:#ffcc00;
   --accent2:#39d1ff;
   --danger:#ff4d4d;
+}
+
+/* Buttons, inputs, and canvases keep a fixed dark background in both themes
+   (deliberate "dark chrome" look), so their text uses --text-on-dark /
+   --text-dim-on-dark instead of the flippable --text / --text-dim below. */
+:root[data-theme="light"]{
+  --bg:#f2ede4;
+  --panel-bg:#ffffff;
+  --text:#221c30;
+  --text-dim:#6b6478;
+  --accent:#9c6f00;
+  --accent2:#0077aa;
 }
 
 *{box-sizing:border-box}
@@ -139,9 +153,14 @@ body{
 #overlaySub{
   margin-top:8px;
   font-size:12px;
-  color:var(--text-dim);
+  color:var(--text-dim-on-dark);
   text-transform:uppercase;
   letter-spacing:1px;
+}
+
+.overlay .auth-btn-ghost{
+  color:var(--text-dim-on-dark);
+  border-color:var(--text-dim-on-dark);
 }
 
 .side-panel{
@@ -189,7 +208,7 @@ body{
   height:44px;
   background:#3a3050;
   border:3px solid var(--ink);
-  color:var(--text);
+  color:var(--text-on-dark);
   font-size:18px;
   font-weight:900;
   cursor:pointer;
@@ -286,7 +305,7 @@ body{
 .auth-input{
   background:#0a0812;
   border:3px solid var(--ink);
-  color:var(--text);
+  color:var(--text-on-dark);
   font-family:inherit;
   font-size:15px;
   padding:9px 10px;
@@ -302,7 +321,7 @@ body{
   height:46px;
   background:#3a3050;
   border:3px solid var(--ink);
-  color:var(--text);
+  color:var(--text-on-dark);
   font-family:inherit;
   font-size:14px;
   font-weight:900;
@@ -516,6 +535,7 @@ div.vs-code-input{
   background:#0a0812;
   border:2px solid var(--ink);
   font-size:13px;
+  color:var(--text-on-dark);
 }
 
 .lb-rank{
@@ -578,7 +598,7 @@ div.vs-code-input{
   height:32px;
   background:#3a3050;
   border:3px solid var(--ink);
-  color:var(--text-dim);
+  color:var(--text-dim-on-dark);
   font-family:inherit;
   font-size:10px;
   font-weight:900;
@@ -611,6 +631,7 @@ div.vs-code-input{
   font-size:13px;
   font-weight:700;
   letter-spacing:1px;
+  color:var(--text-on-dark);
 }
 
 .imp-timer-row{
@@ -697,7 +718,7 @@ div.vs-code-input{
   height:36px;
   background:#3a3050;
   border:3px solid var(--ink);
-  color:var(--text-dim);
+  color:var(--text-dim-on-dark);
   font-family:inherit;
   font-size:11px;
   font-weight:900;
@@ -726,7 +747,7 @@ div.vs-code-input{
   height:40px;
   background:#3a3050;
   border:3px solid var(--ink);
-  color:var(--text);
+  color:var(--text-on-dark);
   font-family:inherit;
   font-size:11px;
   font-weight:900;
@@ -755,4 +776,161 @@ div.vs-code-input{
 .imp-vote-btn.active{
   background:var(--accent2);
   color:#000;
+}
+
+.icon-btn{
+  width:32px;
+  height:32px;
+  background:#3a3050;
+  border:3px solid var(--ink);
+  color:var(--text-on-dark);
+  font-size:14px;
+  line-height:1;
+  cursor:pointer;
+  box-shadow:3px 3px 0 #000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+}
+
+.icon-btn:active{
+  transform:translate(3px,3px);
+  box-shadow:none;
+}
+
+.avatar-picker{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+}
+
+.avatar-preview{
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:#3a3050;
+  border:3px solid var(--ink);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  margin:0 auto;
+}
+
+.avatar-preview-lg{
+  width:88px;
+  height:88px;
+}
+
+.avatar-img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.avatar-initial{
+  font-size:22px;
+  font-weight:900;
+  color:var(--text-on-dark);
+}
+
+.avatar-preview-lg .avatar-initial{
+  font-size:34px;
+}
+
+.setting-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:4px 0;
+}
+
+.setting-label{
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:1px;
+  color:var(--text);
+}
+
+.toggle-switch{
+  position:relative;
+  display:inline-block;
+  width:44px;
+  height:24px;
+  flex-shrink:0;
+}
+
+.toggle-switch input{
+  opacity:0;
+  width:0;
+  height:0;
+}
+
+.toggle-slider{
+  position:absolute;
+  inset:0;
+  cursor:pointer;
+  background:#3a3050;
+  border:2px solid var(--ink);
+  transition:background .15s;
+}
+
+.toggle-slider::before{
+  content:"";
+  position:absolute;
+  height:16px;
+  width:16px;
+  left:2px;
+  top:2px;
+  background:var(--text-on-dark);
+  transition:transform .15s;
+}
+
+.toggle-switch input:checked + .toggle-slider{
+  background:var(--accent2);
+}
+
+.toggle-switch input:checked + .toggle-slider::before{
+  transform:translateX(20px);
+  background:#000;
+}
+
+.fps-counter{
+  position:fixed;
+  top:6px;
+  left:6px;
+  background:#3a3050;
+  color:var(--accent2);
+  font-family:"Courier New", ui-monospace, Menlo, monospace;
+  font-size:11px;
+  font-weight:900;
+  padding:3px 6px;
+  border:2px solid var(--ink);
+  z-index:9999;
+  pointer-events:none;
+}
+
+.profile-card-name{
+  text-align:center;
+  font-size:16px;
+  font-weight:900;
+  letter-spacing:1px;
+  color:var(--text);
+}
+
+.profile-card-coins{
+  text-align:center;
+  font-size:13px;
+  font-weight:800;
+  color:var(--accent);
+  margin-bottom:4px;
+}
+
+.label-clickable{
+  cursor:pointer;
+  text-decoration:underline;
 }

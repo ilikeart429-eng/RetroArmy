@@ -6,6 +6,7 @@ import {
 import { getSession } from "./session.js";
 import { showScreen, returnToDashboard } from "./screens.js";
 import { computeCoins, awardCoins, IMPOSTER_COIN_MULTIPLIER } from "./coins.js";
+import { showProfileCard } from "./profileCard.js";
 
 const COLS = 10, ROWS = 20, CELL = 12;
 const LOBBY_SIZE = 4;
@@ -324,7 +325,7 @@ function renderSabotageTargets() {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'imp-target-btn' + (uid === selectedTargetUid ? ' active' : '');
-    btn.textContent = (players[uid] && players[uid].username || 'PLAYER').toUpperCase();
+    btn.textContent = (players[uid] && (players[uid].displayName || players[uid].username) || 'PLAYER').toUpperCase();
     btn.addEventListener('click', () => {
       selectedTargetUid = uid;
       wrap.querySelectorAll('.imp-target-btn').forEach(b => b.classList.remove('active'));
@@ -451,8 +452,10 @@ function startRound(session) {
   }
 
   playerIds.forEach((uid, i) => {
-    const name = (players[uid] && players[uid].username || 'PLAYER').toUpperCase();
-    document.getElementById(`impLabel${i}`).textContent = uid === session.uid ? `${name} (YOU)` : name;
+    const name = (players[uid] && (players[uid].displayName || players[uid].username) || 'PLAYER').toUpperCase();
+    const labelEl = document.getElementById(`impLabel${i}`);
+    labelEl.textContent = uid === session.uid ? `${name} (YOU)` : name;
+    labelEl.onclick = () => showProfileCard(uid);
   });
   document.getElementById(`impCol${mySlot}`).classList.add('imp-col-mine');
 
@@ -531,7 +534,7 @@ function beginVoting() {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'auth-btn imp-vote-btn';
-    btn.textContent = (players[uid] && players[uid].username || 'PLAYER').toUpperCase() + (uid === session.uid ? ' (YOU)' : '');
+    btn.textContent = (players[uid] && (players[uid].displayName || players[uid].username) || 'PLAYER').toUpperCase() + (uid === session.uid ? ' (YOU)' : '');
     btn.addEventListener('click', () => {
       optionsEl.querySelectorAll('.imp-vote-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -641,7 +644,10 @@ document.addEventListener('keydown', event => {
 
 function renderWaitPlayers(ids, playerMap) {
   const wrap = document.getElementById('impWaitPlayers');
-  wrap.innerHTML = ids.map(uid => `<div class="imp-wait-row">${((playerMap[uid] || {}).username || '?').toUpperCase()}</div>`).join('');
+  wrap.innerHTML = ids.map(uid => {
+    const p = playerMap[uid] || {};
+    return `<div class="imp-wait-row">${(p.displayName || p.username || '?').toUpperCase()}</div>`;
+  }).join('');
   document.getElementById('impWaitLead').textContent = `WAITING FOR PLAYERS... (${ids.length}/${LOBBY_SIZE})`;
 }
 
@@ -679,8 +685,8 @@ async function tryFormGroup(session) {
       }
 
       const ids = [session.uid, ...freshDocs.map(f => f.id)];
-      const playerMap = { [session.uid]: { username: session.username } };
-      freshDocs.forEach(f => { playerMap[f.id] = { username: f.data.username }; });
+      const playerMap = { [session.uid]: { username: session.username, displayName: session.displayName || session.username } };
+      freshDocs.forEach(f => { playerMap[f.id] = { username: f.data.username, displayName: f.data.displayName || f.data.username }; });
       const imposterIdx = Math.random() * ids.length | 0;
 
       tx.set(lobbyRef, {
@@ -729,10 +735,11 @@ export async function startRandomLobby() {
 
     await setDoc(doc(db, 'imposterQueue', session.uid), {
       username: session.username,
+      displayName: session.displayName || session.username,
       joinedAt: serverTimestamp(),
       lobbyId: null
     });
-    renderWaitPlayers([session.uid], { [session.uid]: { username: session.username } });
+    renderWaitPlayers([session.uid], { [session.uid]: { username: session.username, displayName: session.displayName || session.username } });
     queueUnsub = onSnapshot(doc(db, 'imposterQueue', session.uid), snap => {
       const data = snap.data();
       if (data && data.lobbyId) {
@@ -782,7 +789,7 @@ export async function createLobbyRoom() {
     await setDoc(doc(db, 'imposterLobbies', code), {
       status: 'waiting',
       playerIds: [session.uid],
-      players: { [session.uid]: { username: session.username } },
+      players: { [session.uid]: { username: session.username, displayName: session.displayName || session.username } },
       createdAt: serverTimestamp(),
       startedAt: null,
       votes: {},
@@ -800,7 +807,7 @@ export async function createLobbyRoom() {
   const codeEl = document.getElementById('impRoomCodeDisplay');
   codeEl.textContent = code;
   codeEl.classList.remove('hidden');
-  renderWaitPlayers([session.uid], { [session.uid]: { username: session.username } });
+  renderWaitPlayers([session.uid], { [session.uid]: { username: session.username, displayName: session.displayName || session.username } });
 
   watchLobby(code);
 }
@@ -826,7 +833,7 @@ export async function joinLobbyRoom(code) {
       if (data.playerIds.length >= LOBBY_SIZE) throw new Error('full');
 
       const ids = [...data.playerIds, session.uid];
-      const playerMap = { ...data.players, [session.uid]: { username: session.username } };
+      const playerMap = { ...data.players, [session.uid]: { username: session.username, displayName: session.displayName || session.username } };
 
       if (ids.length >= LOBBY_SIZE) {
         const imposterIdx = Math.random() * ids.length | 0;

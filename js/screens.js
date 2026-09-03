@@ -6,6 +6,8 @@ const SCREEN_IDS = [
   'dashboardScreen',
   'modePickerScreen',
   'difficultyPickerScreen',
+  'profileScreen',
+  'settingsScreen',
   'versusPickerScreen',
   'vsJoinScreen',
   'vsWaitScreen',
@@ -31,7 +33,7 @@ export function showScreen(id) {
 export function returnToDashboard() {
   const session = getSession();
   if (session) {
-    document.getElementById('dashPlayerName').textContent = session.username.toUpperCase();
+    document.getElementById('dashPlayerName').textContent = (session.displayName || session.username).toUpperCase();
     document.getElementById('dashBlockCoins').textContent = session.blockCoins || 0;
   }
   showScreen('dashboardScreen');
