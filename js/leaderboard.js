@@ -14,7 +14,7 @@ async function fetchTop(field) {
   const snap = await getDocs(query(collection(db, 'users'), orderBy(field, 'desc'), limit(TOP_N)));
   return snap.docs.map(d => ({
     uid: d.id,
-    username: d.data().username || 'PLAYER',
+    username: d.data().displayName || d.data().username || 'PLAYER',
     score: d.data()[field] || 0
   }));
 }
@@ -80,7 +80,7 @@ export async function renderLeaderboard(difficulty) {
       if (top.length) list.append(makeSeparator());
       list.append(makeRow({
         rank: await fetchRank(field, myScore),
-        username: session.username,
+        username: session.displayName || session.username,
         score: myScore,
         isMe: true
       }));

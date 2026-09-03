@@ -87,7 +87,10 @@ function friendlyError(err) {
   }
 }
 
-function enterGame({ username, highScore, mode: playMode, uid, highScoreEasy, highScoreHard, highScoreExpert, blockCoins }) {
+function enterGame({
+  username, highScore, mode: playMode, uid, highScoreEasy, highScoreHard, highScoreExpert, blockCoins,
+  displayName, avatarThumb
+}) {
   hideLoading();
   authScreen.classList.add('hidden');
 
@@ -100,9 +103,12 @@ function enterGame({ username, highScore, mode: playMode, uid, highScoreEasy, hi
     gameApp.classList.remove('hidden');
     window.startGame(highScore || 0);
   } else {
-    playerNameEl.textContent = username.toUpperCase();
+    playerNameEl.textContent = (displayName || username).toUpperCase();
     signOutBtn.classList.remove('hidden');
-    showDashboard({ uid, username, highScore: highScore || 0, highScoreEasy, highScoreHard, highScoreExpert, blockCoins });
+    showDashboard({
+      uid, username, highScore: highScore || 0, highScoreEasy, highScoreHard, highScoreExpert, blockCoins,
+      displayName, avatarThumb
+    });
   }
 }
 
@@ -131,6 +137,8 @@ async function handleSignUp() {
     const cred = await createUserWithEmailAndPassword(auth, usernameToEmail(username), password);
     await setDoc(doc(db, 'users', cred.user.uid), {
       username,
+      displayName: username,
+      avatarThumb: null,
       highScore: 0,
       highScoreEasy: 0,
       highScoreHard: 0,
@@ -140,7 +148,8 @@ async function handleSignUp() {
     });
     await delay(Math.max(0, MIN_LOADING_MS - (Date.now() - started)));
     enterGame({
-      username, highScore: 0, highScoreEasy: 0, highScoreHard: 0, highScoreExpert: 0, blockCoins: 0,
+      username, displayName: username, avatarThumb: null,
+      highScore: 0, highScoreEasy: 0, highScoreHard: 0, highScoreExpert: 0, blockCoins: 0,
       mode: 'account', uid: cred.user.uid
     });
   } catch (err) {
@@ -160,6 +169,7 @@ async function loadProfile(uid, fallbackUsername) {
   if (data.highScoreHard === undefined) backfill.highScoreHard = 0;
   if (data.highScoreExpert === undefined) backfill.highScoreExpert = 0;
   if (data.blockCoins === undefined) backfill.blockCoins = 0;
+  if (data.displayName === undefined) backfill.displayName = data.username || fallbackUsername;
   if (Object.keys(backfill).length) {
     updateDoc(doc(db, 'users', uid), backfill).catch(() => {});
   }
@@ -171,6 +181,8 @@ async function loadProfile(uid, fallbackUsername) {
     highScoreHard: data.highScoreHard || 0,
     highScoreExpert: data.highScoreExpert || 0,
     blockCoins: data.blockCoins || 0,
+    displayName: data.displayName || data.username || fallbackUsername,
+    avatarThumb: data.avatarThumb || null,
     mode: 'account',
     uid
   };
