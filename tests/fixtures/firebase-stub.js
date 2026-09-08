@@ -52,10 +52,11 @@ export async function signOut() { localStorage.removeItem(SESSION_KEY); }
 export function serverTimestamp() { return '<server-timestamp>'; }
 export function increment(by) { return { __increment: by }; }
 export function collection(db, name) { return { name }; }
-export function doc(dbOrCollection, name, id) {
-  return dbOrCollection.name
-    ? { name: dbOrCollection.name, id: name }
-    : { name, id };
+// Subcollection paths keep their full prefix as the collection name, so
+// matches/<id>/state/<uid> does not land on top of the match document.
+export function doc(dbOrCollection, ...segments) {
+  const parts = dbOrCollection.name ? [dbOrCollection.name, ...segments] : segments;
+  return { name: parts.slice(0, -1).join('/'), id: parts[parts.length - 1] };
 }
 
 function snapshot(name, id) {

@@ -241,10 +241,12 @@ function bindControlsOnce() {
   document.getElementById('vsRightBtn').addEventListener('click', moveRight);
   document.getElementById('vsDownBtn').addEventListener('click', softDrop);
   document.getElementById('vsRotateBtn').addEventListener('click', rotatePiece);
-  document.getElementById('vsBackToDashBtn').addEventListener('click', () => {
+  const leaveMatch = () => {
     teardownMatch();
     returnToDashboard();
-  });
+  };
+  document.getElementById('vsBackToDashBtn').addEventListener('click', leaveMatch);
+  document.getElementById('vsWinBackBtn').addEventListener('click', leaveMatch);
   document.getElementById('vsMyLabel').addEventListener('click', () => {
     const session = getSession();
     if (session) showProfileCard(session.uid);
@@ -325,16 +327,39 @@ function teardownMatch() {
   matchEnded = true;
 }
 
+const WIN_SHOUTS = [
+  'YOU WON, BUDDY!',
+  'WINNER! ABSOLUTE UNIT!',
+  'GG! THEY NEVER STOOD A CHANCE',
+  'VICTORY! GO ON, GLOAT A LITTLE'
+];
+
+function reasonText(didWin, reason) {
+  if (reason === 'target') return didWin ? 'YOU REACHED THE TARGET SCORE FIRST' : 'OPPONENT REACHED THE TARGET SCORE FIRST';
+  if (reason === 'topout') return didWin ? 'OPPONENT TOPPED OUT' : 'YOU TOPPED OUT';
+  return '';
+}
+
+// A win leaves the board on screen - it just blinks a banner above it, so you
+// get to look at the position you won with instead of a full-screen takeover.
+function showWinBanner(reason) {
+  document.getElementById('vsWinText').textContent = WIN_SHOUTS[Math.random() * WIN_SHOUTS.length | 0];
+  document.getElementById('vsWinSub').textContent = reasonText(true, reason);
+  document.getElementById('vsWinBanner').classList.remove('hidden');
+}
+
+function showLossOverlay(reason) {
+  document.getElementById('vsResultTitle').textContent = 'YOU LOSE';
+  document.getElementById('vsResultSub').textContent = reasonText(false, reason);
+  document.getElementById('vsResultOverlay').classList.remove('hidden');
+}
+
 function endMatch(didWin, reason) {
   matchEnded = true;
   stopLoop();
   cleanupListeners();
-  const overlayEl = document.getElementById('vsResultOverlay');
-  document.getElementById('vsResultTitle').textContent = didWin ? 'YOU WIN' : 'YOU LOSE';
-  document.getElementById('vsResultSub').textContent =
-    reason === 'target' ? (didWin ? 'YOU REACHED THE TARGET SCORE FIRST' : 'OPPONENT REACHED THE TARGET SCORE FIRST') :
-    reason === 'topout' ? (didWin ? 'OPPONENT TOPPED OUT' : 'YOU TOPPED OUT') : '';
-  overlayEl.classList.remove('hidden');
+  if (didWin) showWinBanner(reason);
+  else showLossOverlay(reason);
   if (didWin && engine) awardCoins(computeCoins(engine.score, VERSUS_COIN_MULTIPLIER));
 }
 
@@ -385,6 +410,7 @@ function beginMatch(matchId, oppId, targetScore) {
   document.getElementById('vsMyScore').textContent = '0';
   document.getElementById('vsOppScore').textContent = '0';
   document.getElementById('vsResultOverlay').classList.add('hidden');
+  document.getElementById('vsWinBanner').classList.add('hidden');
   oppCtx.clearRect(0, 0, oppCanvas.width, oppCanvas.height);
 
   getDoc(doc(db, 'users', oppId)).then(s => {

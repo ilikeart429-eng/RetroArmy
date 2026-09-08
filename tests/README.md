@@ -23,4 +23,6 @@ committing; on CI failures the report and diff images are uploaded as the
 - **Time** — `page.clock.install()` freezes timers, so gravity only moves when a
   test advances the clock, and the 5s loading screen is skipped instantly.
 - **Pieces** — `Math.random` is replaced with a seeded PRNG, so the piece
-  sequence is identical on every run.
+  sequence is identical on every run. `openApp(page, data, { fixedRandom: 0 })`
+  pins it to one value instead, which makes every piece an I piece for tests
+  that need to build an exact board.
