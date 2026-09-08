@@ -40,10 +40,16 @@ const START_TIME = new Date('2026-01-01T00:00:00Z');
 // Freezes time and the piece sequence so canvas screenshots are reproducible.
 // install() alone still advances with real time, so the clock is paused once
 // the page is up - from then on gravity only moves when a test says so.
-async function openApp(page, data = seedData()) {
+// fixedRandom pins Math.random to one value, which pins the piece bag to a
+// single shape - handy when a test has to build an exact board.
+async function openApp(page, data = seedData(), { fixedRandom = null } = {}) {
   await page.clock.install({ time: START_TIME });
-  await page.addInitScript(seed => {
+  await page.addInitScript(({ seed, fixed }) => {
     window.__RA_DATA = seed;
+    if (fixed !== null) {
+      Math.random = () => fixed;
+      return;
+    }
     let state = 0x9e3779b9;
     Math.random = () => {
       state = (state + 0x6d2b79f5) | 0;
@@ -51,7 +57,7 @@ async function openApp(page, data = seedData()) {
       t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
-  }, data);
+  }, { seed: data, fixed: fixedRandom });
   await page.route('https://www.gstatic.com/firebasejs/**', route =>
     route.fulfill({ contentType: 'text/javascript', body: FIREBASE_STUB })
   );
@@ -91,4 +97,46 @@ async function dropPieces(page, count) {
   for (let i = 0; i < count; i++) await page.keyboard.press(' ');
 }
 
-module.exports = { ME, seedData, openApp, skipLoadingScreen, signIn, playAsGuest, startSoloGame, dropPieces };
+const ROOM = { code: 'ABC123', hostUid: 'uid-nova', hostUsername: 'nova' };
+
+const roomData = targetScore => {
+  const data = seedData();
+  data.collections.matches = {
+    [ROOM.code]: {
+      status: 'waiting',
+      targetScore,
+      players: { [ROOM.hostUid]: { username: ROOM.hostUsername } },
+      playerIds: [ROOM.hostUid],
+      winner: null,
+      endReason: null
+    }
+  };
+  return data;
+};
+
+async function joinVersusRoom(page, code = ROOM.code) {
+  await page.locator('#dashPlayClassicBtn').click();
+  await page.locator('#modeVersusBtn').click();
+  await page.locator('#vsJoinRoomBtn').click();
+  await page.locator('#vsJoinCodeInput').fill(code);
+  await page.locator('#vsJoinSubmitBtn').click();
+  await expect(page.locator('#versusApp')).toBeVisible();
+}
+
+// With every piece an I piece, four drops fill the bottom row: two flat ones
+// cover columns 0-7, two upright ones cap columns 8 and 9.
+async function clearVersusBottomRow(page) {
+  const drop = async (keys) => {
+    for (const key of keys) await page.keyboard.press(key);
+    await page.keyboard.press(' ');
+  };
+  await drop(['ArrowLeft', 'ArrowLeft', 'ArrowLeft']);
+  await drop(['ArrowRight']);
+  await drop(['ArrowUp', 'ArrowRight', 'ArrowRight', 'ArrowRight', 'ArrowRight', 'ArrowRight']);
+  await drop(['ArrowUp', 'ArrowRight', 'ArrowRight', 'ArrowRight', 'ArrowRight', 'ArrowRight', 'ArrowRight']);
+}
+
+module.exports = {
+  ME, ROOM, seedData, roomData, openApp, skipLoadingScreen, signIn, playAsGuest,
+  startSoloGame, dropPieces, joinVersusRoom, clearVersusBottomRow
+};
