@@ -7,6 +7,7 @@ import { getSession } from "./session.js";
 import { showScreen, returnToDashboard } from "./screens.js";
 import { computeCoins, awardCoins, IMPOSTER_COIN_MULTIPLIER } from "./coins.js";
 import { showProfileCard } from "./profileCard.js";
+import { playWinSound } from "./sound.js";
 
 const COLS = 10, ROWS = 20, CELL = 12;
 const LOBBY_SIZE = 4;
@@ -610,7 +611,10 @@ function handleFinished(data) {
     `THE IMPOSTER WAS ${imposterName.toUpperCase()}. ` +
     (ejectedName ? `THE GROUP EJECTED ${ejectedName.toUpperCase()}.` : 'NO ONE WAS EJECTED.');
 
-  if (won && myEngine) awardCoins(computeCoins(myEngine.score, IMPOSTER_COIN_MULTIPLIER));
+  if (won) {
+    playWinSound();
+    if (myEngine) awardCoins(computeCoins(myEngine.score, IMPOSTER_COIN_MULTIPLIER));
+  }
 }
 
 document.getElementById('impBackToDashBtn').addEventListener('click', () => {
