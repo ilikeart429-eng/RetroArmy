@@ -437,7 +437,7 @@ async function beginRound(lobbyId, ids, playerMap) {
   document.getElementById('impRoleTitle').textContent = myRole === 'imposter' ? 'YOU ARE THE IMPOSTER' : 'YOU ARE CREW';
   document.getElementById('impRoleSub').textContent = myRole === 'imposter'
     ? 'Sabotage the crew without getting caught'
-    : 'Play Blocks and find the imposter';
+    : 'Play The Stack and find the imposter';
 
   setTimeout(() => startRound(session), 3000);
 }

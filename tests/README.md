@@ -1,6 +1,6 @@
 # Tests
 
-Playwright end-to-end tests for BLOCKS!, plus committed screenshot baselines.
+Playwright end-to-end tests for The Stack, plus committed screenshot baselines.
 
 ```
 npm test                        # run everything (Linux container)

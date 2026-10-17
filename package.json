@@ -2,7 +2,7 @@
   "name": "retroarmy",
   "version": "1.0.0",
   "private": true,
-  "description": "BLOCKS! - a retro block-stacking game",
+  "description": "The Stack - a retro block-stacking game",
   "scripts": {
     "serve": "node tests/server.js",
     "test": "tests/run-in-docker.sh",
